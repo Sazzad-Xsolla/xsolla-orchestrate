@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAGE_TITLE}}</title>
+  <style>
+    /* ══════════════════════════════════════════════════════
+       @font-face — Xsolla CDN
+       ══════════════════════════════════════════════════════ */
+
+    /* Pilat Wide (B2C headings) */
+    @font-face { font-family: 'Pilat Wide'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Medium_/Pilat_Test_Medium.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat Wide'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Demi_Bold_bee67c470a/Pilat_Test_Demi_Bold_bee67c470a.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat Wide'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Bold_b12b40d234/Pilat_Test_Bold_b12b40d234.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat Wide'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Heavy_2885678ca4/Pilat_Test_Heavy_2885678ca4.otf') format('opentype'); font-weight: 800; font-style: normal; font-display: swap; }
+
+    /* Pilat (B2B headings) */
+    @font-face { font-family: 'Pilat'; src: url('https://cdn.xsolla.net/merchant-bucket-prod/files/uploaded/722279/55a03110b2400b778d485de2c8d064c0.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat'; src: url('https://cdn.xsolla.net/merchant-bucket-prod/files/uploaded/722279/e968c9cc76e48ff6111c90534549bbf9.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat'; src: url('https://cdn.xsolla.net/merchant-bucket-prod/files/uploaded/722279/ed4fe74e88aaacc6978f06a862e75b08.woff2') format('woff2'); font-weight: 600; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat'; src: url('https://cdn.xsolla.net/merchant-bucket-prod/files/uploaded/722279/7450f429979af7eaa8fa4d4d91cee927.woff2') format('woff2'); font-weight: 700; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Pilat'; src: url('https://cdn.xsolla.net/merchant-bucket-prod/files/uploaded/722279/218d647ff7690c1e312f6943e29af375.woff2') format('woff2'); font-weight: 800; font-style: normal; font-display: swap; }
+
+    /* Aktiv Grotesk (body, all contexts) */
+    @font-face { font-family: 'Aktiv Grotesk'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Light_c4650750bb/Pilat_Test_Light_c4650750bb.otf') format('opentype'); font-weight: 300; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Aktiv Grotesk'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Book_5cb49cd592/Pilat_Test_Book_5cb49cd592.otf') format('opentype'); font-weight: 400; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Aktiv Grotesk'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Demi_e9bed59107/Pilat_Test_Demi_e9bed59107.otf') format('opentype'); font-weight: 500; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Aktiv Grotesk'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Bold_195d1b44fa/Pilat_Test_Bold_195d1b44fa.otf') format('opentype'); font-weight: 600; font-style: normal; font-display: swap; }
+    @font-face { font-family: 'Aktiv Grotesk'; src: url('https://cdn.xsolla.net/strapi-v2-bucket-prod/Pilat_Test_Bold_195d1b44fa/Pilat_Test_Bold_195d1b44fa.otf') format('opentype'); font-weight: 700; font-style: normal; font-display: swap; }
+
+    /* ══════════════════════════════════════════════════════
+       CSS Custom Properties — Xsolla Design Tokens
+       Theme: pentagram-dark (packages/core/src/tokens/pentagram-dark.json)
+       ══════════════════════════════════════════════════════ */
+    :root {
+      /* ── Font Stacks ── */
+      --xui-font-heading-b2b: 'Pilat', 'Aktiv Grotesk', 'Noto Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --xui-font-heading-b2c: 'Pilat Wide', 'Aktiv Grotesk', 'Noto Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --xui-font-body: 'Aktiv Grotesk', 'Noto Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      /* Promo / marketing pages — Pilat Wide Bold for semantic h1 & h2 (see SKILL.md); aliases B2C heading stack + registered 700 face */
+      --xui-font-promo-heading: var(--xui-font-heading-b2c);
+      --xui-font-weight-promo-heading: 700;
+
+      /* ── Spacing ── */
+      --xui-space-xs: 4px;
+      --xui-space-s: 8px;
+      --xui-space-m: 16px;
+      --xui-space-l: 24px;
+      --xui-space-xl: 32px;
+
+      /* ── Border Radius ── */
+      --xui-radius-button: 4px;
+      --xui-radius-card: 12px;
+      --xui-radius-input: 4px;
+      --xui-radius-tag-sm: 2px;
+      --xui-radius-tag-lg: 4px;
+      --xui-radius-avatar-sm: 4px;
+      --xui-radius-avatar-lg: 8px;
+      --xui-radius-avatar-circle: 999px;
+
+      /* ── Shadows ── */
+      --xui-shadow-active: 0px 1px 2px rgba(7,7,8,0.2), 0px 1px 3px 1px rgba(7,7,8,0.1);
+      --xui-shadow-surface: 0px 1px 2px rgba(7,7,8,0.2), 0px 2px 6px 2px rgba(7,7,8,0.1);
+      --xui-shadow-surface-hover: 0px 4px 8px 3px rgba(7,7,8,0.1), 0px 1px 3px rgba(7,7,8,0.2);
+      --xui-shadow-popover: 0px 6px 10px 4px rgba(7,7,8,0.1), 0px 2px 3px rgba(7,7,8,0.2);
+      --xui-shadow-modal: 0px 8px 12px 6px rgba(7,7,8,0.1), 0px 4px 4px rgba(7,7,8,0.2);
+
+      /* ── Background ── */
+      --xui-bg-primary: #1b2628;
+      --xui-bg-secondary: #141d1f;
+      --xui-bg-inverse: #ffffff;
+      --xui-bg-brand-primary: #80eaff;
+      --xui-bg-brand-secondary: #0b3841;
+      --xui-bg-brand-extra-primary: #cef655;
+      --xui-bg-brand-extra-secondary: #566c13;
+      --xui-bg-success-primary: #95ff80;
+      --xui-bg-success-secondary: #14410b;
+      --xui-bg-warning-primary: #ffc380;
+      --xui-bg-warning-secondary: #6c4313;
+      --xui-bg-alert-primary: #e84f30;
+      --xui-bg-alert-secondary: #6c2213;
+      --xui-bg-neutral-primary: #99aeb2;
+      --xui-bg-neutral-secondary: #34474b;
+
+      /* ── Content ── */
+      --xui-content-primary: #e8eced;
+      --xui-content-secondary: rgba(232,236,237,0.72);
+      --xui-content-tertiary: rgba(232,236,237,0.58);
+      --xui-content-inverse: #000000;
+      --xui-content-brand-primary: #80eaff;
+      --xui-content-brand-secondary: #55dcf6;
+      --xui-content-brand-extra-primary: #cef655;
+      --xui-content-brand-extra-secondary: #9bc323;
+      --xui-content-success-primary: #70f655;
+      --xui-content-success-secondary: #3dc322;
+      --xui-content-warning-primary: #f6ab55;
+      --xui-content-warning-secondary: #c37822;
+      --xui-content-alert-primary: #f67055;
+      --xui-content-alert-secondary: #e84f30;
+      --xui-content-neutral-primary: #99aeb2;
+      --xui-content-neutral-secondary: #4b6368;
+      --xui-content-on-brand: #000000;
+      --xui-content-on-brand-extra: #000000;
+      --xui-content-on-success: #000000;
+      --xui-content-on-warning: #000000;
+      --xui-content-on-alert: #ffffff;
+      --xui-content-on-neutral: #ffffff;
+      --xui-content-static-light: #ffffff;
+      --xui-content-static-dark: #000000;
+
+      /* ── Border ── */
+      --xui-border-primary: #ffffff;
+      --xui-border-secondary: rgba(178,242,255,0.1);
+      --xui-border-inverse: rgba(0,0,0,0.15);
+      --xui-border-brand: #55dcf6;
+      --xui-border-brand-extra: #cef655;
+      --xui-border-success: #70f655;
+      --xui-border-warning: #f6ab55;
+      --xui-border-alert: #f67055;
+      --xui-border-neutral: #9580ff;
+
+      /* ── Overlay ── */
+      --xui-overlay-mono: rgba(178,242,255,0.06);
+      --xui-overlay-brand: rgba(128,234,255,0.2);
+      --xui-overlay-brand-extra: rgba(206,246,85,0.3);
+      --xui-overlay-success: rgba(149,255,128,0.2);
+      --xui-overlay-warning: rgba(255,195,128,0.24);
+      --xui-overlay-alert: rgba(232,79,48,0.32);
+      --xui-overlay-neutral: rgba(123,152,157,0.28);
+
+      /* ── Layer ── */
+      --xui-layer-scrim: rgba(0,0,0,0.5);
+      --xui-layer-float: #000000;
+
+      /* ── Control: Brand ── */
+      --xui-ctrl-brand-primary-bg: #80eaff;
+      --xui-ctrl-brand-primary-bg-hover: #b2f2ff;
+      --xui-ctrl-brand-primary-bg-press: #55dcf6;
+      --xui-ctrl-brand-primary-bg-disable: rgba(52,71,75,0.85);
+      --xui-ctrl-brand-primary-border: #31cae8;
+      --xui-ctrl-brand-primary-border-hover: #55dcf6;
+      --xui-ctrl-brand-secondary-bg: #135d6c;
+      --xui-ctrl-brand-secondary-bg-hover: #1b8398;
+      --xui-ctrl-brand-secondary-bg-press: #0b3841;
+      --xui-ctrl-brand-secondary-border: #22a8c3;
+      --xui-ctrl-brand-secondary-border-hover: #22a8c3;
+      --xui-ctrl-brand-tertiary-bg: transparent;
+      --xui-ctrl-brand-tertiary-bg-hover: #0b3841;
+      --xui-ctrl-brand-tertiary-bg-press: #135d6c;
+      --xui-ctrl-brand-ghost-bg: transparent;
+      --xui-ctrl-brand-ghost-bg-hover: rgba(128,234,255,0.04);
+      --xui-ctrl-brand-ghost-bg-press: rgba(128,234,255,0.08);
+      --xui-ctrl-brand-ghost-border: rgba(128,234,255,0.16);
+      --xui-ctrl-brand-ghost-border-hover: rgba(128,234,255,0.24);
+      --xui-ctrl-brand-text-primary: #000000;
+      --xui-ctrl-brand-text-secondary: #80eaff;
+      --xui-ctrl-brand-text-tertiary: #80eaff;
+      --xui-ctrl-brand-text-ghost: #80eaff;
+      --xui-ctrl-brand-text-disable: rgba(232,236,237,0.2);
+
+      /* ── Control: Mono ── */
+      --xui-ctrl-mono-primary-bg: #ffffff;
+      --xui-ctrl-mono-primary-bg-hover: #e8eced;
+      --xui-ctrl-mono-primary-bg-press: #f4f5f6;
+      --xui-ctrl-mono-secondary-bg: #34474b;
+      --xui-ctrl-mono-secondary-bg-hover: #4b6368;
+      --xui-ctrl-mono-secondary-bg-press: #233134;
+      --xui-ctrl-mono-secondary-border: #4b6368;
+      --xui-ctrl-mono-secondary-border-hover: #607f85;
+      --xui-ctrl-mono-tertiary-bg: transparent;
+      --xui-ctrl-mono-tertiary-bg-hover: #233134;
+      --xui-ctrl-mono-tertiary-bg-press: #34474b;
+      --xui-ctrl-mono-ghost-bg: transparent;
+      --xui-ctrl-mono-ghost-bg-hover: rgba(255,255,255,0.04);
+      --xui-ctrl-mono-ghost-bg-press: rgba(255,255,255,0.08);
+      --xui-ctrl-mono-ghost-border: rgba(255,255,255,0.16);
+      --xui-ctrl-mono-ghost-border-hover: rgba(255,255,255,0.24);
+      --xui-ctrl-mono-text-primary: #000000;
+      --xui-ctrl-mono-text-secondary: #ffffff;
+      --xui-ctrl-mono-text-tertiary: #ffffff;
+      --xui-ctrl-mono-text-ghost: #ffffff;
+      --xui-ctrl-mono-text-disable: rgba(232,236,237,0.2);
+
+      /* ── Control: Alert ── */
+      --xui-ctrl-alert-primary-bg: #f67055;
+      --xui-ctrl-alert-primary-bg-hover: #ff9580;
+      --xui-ctrl-alert-primary-bg-press: #e84f30;
+      --xui-ctrl-alert-secondary-bg: rgba(232,79,48,0.4);
+      --xui-ctrl-alert-secondary-bg-hover: rgba(246,112,85,0.4);
+      --xui-ctrl-alert-secondary-bg-press: rgba(195,61,34,0.4);
+      --xui-ctrl-alert-tertiary-bg: transparent;
+      --xui-ctrl-alert-tertiary-bg-hover: rgba(255,170,153,0.07);
+      --xui-ctrl-alert-tertiary-bg-press: rgba(255,85,51,0.12);
+      --xui-ctrl-alert-ghost-bg: transparent;
+      --xui-ctrl-alert-ghost-bg-hover: rgba(246,112,85,0.04);
+      --xui-ctrl-alert-ghost-bg-press: rgba(246,112,85,0.08);
+      --xui-ctrl-alert-ghost-border: rgba(246,112,85,0.16);
+      --xui-ctrl-alert-ghost-border-hover: rgba(246,112,85,0.24);
+      --xui-ctrl-alert-text-primary: #ffffff;
+      --xui-ctrl-alert-text-secondary: #ffffff;
+      --xui-ctrl-alert-text-tertiary: #f67055;
+      --xui-ctrl-alert-text-ghost: #f67055;
+      --xui-ctrl-alert-text-disable: rgba(232,236,237,0.2);
+
+      /* ── Control: BrandExtra ── */
+      --xui-ctrl-brand-extra-primary-bg: #cef655;
+      --xui-ctrl-brand-extra-primary-bg-hover: #bae831;
+      --xui-ctrl-brand-extra-primary-bg-press: #dfff80;
+      --xui-ctrl-brand-extra-secondary-bg: rgba(186,232,49,0.4);
+      --xui-ctrl-brand-extra-secondary-bg-hover: rgba(206,246,85,0.4);
+      --xui-ctrl-brand-extra-secondary-bg-press: rgba(186,232,49,0.4);
+      --xui-ctrl-brand-extra-tertiary-bg: transparent;
+      --xui-ctrl-brand-extra-tertiary-bg-hover: rgba(206,246,85,0.07);
+      --xui-ctrl-brand-extra-tertiary-bg-press: rgba(186,232,49,0.12);
+      --xui-ctrl-brand-extra-ghost-bg: transparent;
+      --xui-ctrl-brand-extra-ghost-bg-hover: rgba(206,246,85,0.04);
+      --xui-ctrl-brand-extra-ghost-bg-press: rgba(206,246,85,0.08);
+      --xui-ctrl-brand-extra-ghost-border: rgba(206,246,85,0.16);
+      --xui-ctrl-brand-extra-ghost-border-hover: rgba(206,246,85,0.24);
+      --xui-ctrl-brand-extra-text-primary: #000000;
+      --xui-ctrl-brand-extra-text-secondary: #ffffff;
+      --xui-ctrl-brand-extra-text-tertiary: #cef655;
+      --xui-ctrl-brand-extra-text-ghost: #cef655;
+      --xui-ctrl-brand-extra-text-disable: rgba(232,236,237,0.2);
+
+      /* ── Control: Input ── */
+      --xui-ctrl-input-bg: rgba(178,242,255,0.12);
+      --xui-ctrl-input-bg-hover: rgba(178,242,255,0.15);
+      --xui-ctrl-input-bg-disable: rgba(178,242,255,0.25);
+      --xui-ctrl-input-border: rgba(178,242,255,0.1);
+      --xui-ctrl-input-border-hover: rgba(178,242,255,0.15);
+      --xui-ctrl-input-border-disable: transparent;
+      --xui-ctrl-input-text: #ffffff;
+      --xui-ctrl-input-placeholder: rgba(255,255,255,0.56);
+      --xui-ctrl-input-text-disable: rgba(255,255,255,0.36);
+
+      /* ── Control: Focus ── */
+      --xui-ctrl-focus-bg: #000000;
+      --xui-ctrl-focus-border: #55dcf6;
+
+      /* ── Control: AppButton ── */
+      --xui-ctrl-app-btn-bg: #34474b;
+      --xui-ctrl-app-btn-bg-hover: #4b6368;
+      --xui-ctrl-app-btn-bg-press: #607f85;
+      --xui-ctrl-app-btn-border: #4b6368;
+      --xui-ctrl-app-btn-border-hover: #607f85;
+      --xui-ctrl-app-btn-text: #b7c5c8;
+
+      /* ── Control: Link ── */
+      --xui-ctrl-text-disable: rgba(255,255,255,0.4);
+      --xui-ctrl-link-primary: #55dcf6;
+      --xui-ctrl-link-primary-hover: #80eaff;
+      --xui-ctrl-link-secondary: #cef655;
+      --xui-ctrl-link-secondary-hover: #dfff80;
+
+      /* ── Control: Check (Checkbox/Radio) ── */
+      --xui-ctrl-check-bg: #135d6c;
+      --xui-ctrl-check-bg-hover: #1b8398;
+      --xui-ctrl-check-bg-disable: rgba(178,242,255,0.25);
+      --xui-ctrl-check-border: #22a8c3;
+      --xui-ctrl-check-border-hover: #22a8c3;
+      --xui-ctrl-check-icon: #80eaff;
+
+      /* ── Control: Switch ── */
+      --xui-ctrl-switch-bg: #135d6c;
+      --xui-ctrl-switch-bg-hover: #1b8398;
+      --xui-ctrl-switch-border: #22a8c3;
+
+      /* ── Control: Knob ── */
+      --xui-ctrl-knob-bg: #80eaff;
+      --xui-ctrl-knob-bg-hover: #b2f2ff;
+      --xui-ctrl-knob-bg-inactive: #ffffff;
+
+      /* ── Control: Faint (unchecked Checkbox / Radio background) ── */
+      --xui-ctrl-faint-bg: rgba(178,242,255,0.15);
+      --xui-ctrl-faint-bg-hover: rgba(178,242,255,0.2);
+      --xui-ctrl-faint-border: rgba(178,242,255,0.1);
+      --xui-ctrl-faint-border-hover: rgba(178,242,255,0.15);
+
+      /* ── Control: Segmented ── */
+      --xui-ctrl-segmented-bg: rgba(178,242,255,0.1);
+      --xui-ctrl-segmented-bg-hover: rgba(178,242,255,0.1);
+      --xui-ctrl-segmented-bg-active: rgba(178,242,255,0.15);
+      --xui-ctrl-segmented-text: #ffffff;
+      --xui-ctrl-segmented-text-disable: rgba(255,255,255,0.4);
+
+      /* ── Control: ToggleButton ── */
+      --xui-ctrl-toggle-bg: rgba(178,242,255,0.12);
+      --xui-ctrl-toggle-bg-hover: rgba(178,242,255,0.15);
+      --xui-ctrl-toggle-bg-active: #135d6c;
+      --xui-ctrl-toggle-border: rgba(178,242,255,0.1);
+      --xui-ctrl-toggle-border-active: #22a8c3;
+      --xui-ctrl-toggle-text: #ffffff;
+      --xui-ctrl-toggle-text-active: #80eaff;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       CSS Reset & Base Styles
+       ══════════════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page canvas: Pentagram Dark body = --xui-bg-secondary (#141d1f) — always */
+    body {
+      font-family: var(--xui-font-body);
+      font-size: 16px;
+      line-height: 20px;
+      font-weight: 400;
+      color: var(--xui-content-primary);
+      background-color: var(--xui-bg-secondary);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ══════════════════════════════════════════════════════
+       Component Styles — injected per page
+       ══════════════════════════════════════════════════════ */
+    {{COMPONENT_STYLES}}
+  </style>
+</head>
+<body>
+  {{PAGE_CONTENT}}
+</body>
+</html>

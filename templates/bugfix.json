@@ -1,0 +1,65 @@
+{
+  "description": "Reproduce a bug with a failing test, fix it, then review the fix.",
+  "tasks": [
+    {
+      "id": "repro",
+      "title": "Reproduce {{BUG}} with a failing test",
+      "shape": "spec",
+      "runtime": "headless",
+      "model": "sonnet",
+      "effort": "medium",
+      "budget_usd": 3,
+      "writes": [
+        "{{TEST_FILE}}"
+      ],
+      "depends_on": [],
+      "done_criteria": [
+        "A new test in {{TEST_FILE}} fails on the current code for the reason in the bug report"
+      ],
+      "accept": "<command that runs the new test and EXPECTS failure, e.g. ! pytest {{TEST_FILE}}::test_name>",
+      "brief": "# Task repro: Reproduce {{BUG}}\n\n## Goal\nWrite one focused test that fails on the current code because of {{BUG}}, and fails for that reason only.\n\n## Background\n- <symptom, how it was observed, expected vs actual>\n- <where the bug probably lives: path:lines>\n\n## Files\n- May read: <paths>\n- **May write: {{TEST_FILE}} only.**\n\n## Done when\n- [ ] The new test fails, and its failure message shows the bug\n- [ ] Every other test still passes\n\n## Verify with\n<test command>\n"
+    },
+    {
+      "id": "fix",
+      "title": "Fix {{BUG}}",
+      "shape": "tricky",
+      "runtime": "headless",
+      "model": "sonnet",
+      "effort": "high",
+      "budget_usd": 4,
+      "writes": [
+        "<source files the fix may touch>"
+      ],
+      "depends_on": [
+        "repro"
+      ],
+      "done_criteria": [
+        "The repro test passes",
+        "The full test suite passes",
+        "No unrelated changes"
+      ],
+      "accept": "<full test suite command>",
+      "brief": "# Task fix: Fix {{BUG}}\n\n## Goal\nMake the test added in {{TEST_FILE}} pass without changing it, by fixing the root cause.\n\n## Background\n- <root-cause notes from the repro task's report>\n\n## Already ruled out\n- <causes checked and rejected>\n\n## Files\n- May read: <paths>\n- **May write: <source files>.** Do not edit {{TEST_FILE}}.\n\n## Done when\n- [ ] The repro test passes\n- [ ] The full suite passes\n\n## Verify with\n<full test suite command>\n",
+      "specialist": "implementation"
+    },
+    {
+      "id": "review",
+      "title": "Review the fix",
+      "shape": "review",
+      "runtime": "headless",
+      "model": "opus",
+      "effort": "high",
+      "budget_usd": 4,
+      "writes": [],
+      "depends_on": [
+        "fix"
+      ],
+      "done_criteria": [
+        "Report says whether the fix addresses the root cause, and lists any missed edge cases or regressions"
+      ],
+      "accept": "<command that verifies review findings against the specification and integration tests>",
+      "brief": "# Task review: Review the fix for {{BUG}}\n\n## Goal\nJudge whether the uncommitted change (`git diff`) fixes the root cause of {{BUG}} rather than the symptom. List missed edge cases and any regression risk. Do not edit files.\n\n## Files\n- **May write: nothing except your report.**\n\n## Done when\n- [ ] Verdict: root cause fixed or not, with evidence\n- [ ] Edge cases and regression risks listed, each with a file:line\n\n## Verify with\n`git diff` and <test command>\n",
+      "specialist": "review"
+    }
+  ]
+}

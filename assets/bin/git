@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# git shim for orchestrate workers. spawn_worker.sh puts this folder first on
+# PATH, so git reached any way (bash -c, python subprocess, rtk) lands here.
+# Blocks subcommands that record, move or rewrite history or talk to remotes;
+# everything else goes to the real git.
+SELF_DIR="$(cd "$(dirname "$0")" && pwd)"
+REAL=""
+IFS=: read -ra DIRS <<< "$PATH"
+for d in "${DIRS[@]}"; do
+  [ "$d" = "$SELF_DIR" ] && continue
+  [ -x "$d/git" ] && { REAL="$d/git"; break; }
+done
+[ -n "$REAL" ] || { echo "git: not found" >&2; exit 127; }
+
+block() {
+  echo "BLOCKED by orchestrator: workers may not run 'git $*'. Put it under Proposed actions in your report instead." >&2
+  exit 126
+}
+
+# Find the subcommand, skipping global options such as -C <dir> and -c <k=v>.
+ARGS=("$@")
+i=0
+SUB=""
+while [ "$i" -lt "${#ARGS[@]}" ]; do
+  case "${ARGS[$i]}" in
+    -C|-c|--git-dir|--work-tree|--namespace) i=$((i + 2)) ;;
+    -*) i=$((i + 1)) ;;
+    *) SUB="${ARGS[$i]}"; break ;;
+  esac
+done
+
+case "$SUB" in
+  commit|push|pull|fetch|merge|rebase|reset|checkout|switch|restore|clean|stash|tag|am|apply|cherry-pick|revert|remote|config|worktree|update-ref|filter-branch|filter-repo|commit-tree|replace|notes|gc|prune)
+    block "$SUB" ;;
+  branch)
+    for a in "$@"; do
+      case "$a" in -d|-D|-m|-M|-c|-C|-f|--delete|--move|--copy|--force) block "branch $a" ;; esac
+    done ;;
+esac
+
+exec "$REAL" "$@"

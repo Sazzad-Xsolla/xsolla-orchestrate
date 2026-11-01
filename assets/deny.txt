@@ -1,0 +1,68 @@
+# One rule per line; blank lines and # comments are ignored.
+# spawn_worker.sh also adds an "rtk "-prefixed copy of every Bash(...) rule.
+
+# git: anything that records, moves or rewrites history or remotes
+Bash(git commit:*)
+Bash(git push:*)
+Bash(git merge:*)
+Bash(git rebase:*)
+Bash(git reset:*)
+Bash(git checkout:*)
+Bash(git switch:*)
+Bash(git restore:*)
+Bash(git clean:*)
+Bash(git stash:*)
+Bash(git tag:*)
+Bash(git am:*)
+Bash(git cherry-pick:*)
+Bash(git revert:*)
+Bash(git remote:*)
+Bash(git config:*)
+Bash(git worktree:*)
+Bash(git branch -d:*)
+Bash(git branch -D:*)
+Bash(git branch -m:*)
+Bash(git branch -M:*)
+
+# code hosts and outward network
+Bash(gh:*)
+Bash(glab:*)
+Bash(curl:*)
+Bash(wget:*)
+Bash(ssh:*)
+Bash(scp:*)
+Bash(rsync:*)
+
+# destructive / privileged
+Bash(rm -rf:*)
+Bash(rm -fr:*)
+Bash(rm -r:*)
+Bash(sudo:*)
+Bash(osascript:*)
+Bash(open:*)
+
+# deploy / publish / cloud
+Bash(kubectl:*)
+Bash(helm:*)
+Bash(terraform:*)
+Bash(gcloud:*)
+Bash(aws:*)
+Bash(docker push:*)
+Bash(npm publish:*)
+Bash(pnpm publish:*)
+Bash(yarn publish:*)
+Bash(twine:*)
+Bash(xsolla:*)
+
+# shell wrappers hide the real command from the rules above
+# (assets/bin shims still catch git/gh inside them)
+Bash(bash -c:*)
+Bash(sh -c:*)
+Bash(zsh -c:*)
+Bash(eval:*)
+
+# no nested agents or self-spawning
+Bash(claude:*)
+Bash(headroom:*)
+Agent
+Task

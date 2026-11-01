@@ -1,0 +1,16 @@
+# Licensed Xsolla brand fonts (from the company design system): keep local, never commit.
+assets/fonts/
+**/fonts/*.woff2
+
+# Per-machine state
+.xsolla-orchestrator/
+*.lock
+validation/
+preview.png
+history.jsonl
+**/dashboard.pid
+**/dashboard.url
+**/.notified.json
+__pycache__/
+*.pyc
+.DS_Store

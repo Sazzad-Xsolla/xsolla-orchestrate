@@ -1,0 +1,97 @@
+{
+  "description": "Access Pass QA chain for one use case: test plan -> human scripts -> pytest scaffolds -> review. Run with the specs repo as project_dir, e.g. init_run.sh \"$HOME/dev/QA auto/specs\" uc-01-qa --template qa-access-pass --var UC=UC-01 --var QA_AUTOMATION=\"$HOME/dev/QA auto/qa-automation\"",
+  "tasks": [
+    {
+      "id": "plan",
+      "title": "QA test plan for {{UC}}",
+      "shape": "tricky",
+      "skills": true,
+      "runtime": "headless",
+      "model": "sonnet",
+      "effort": "high",
+      "budget_usd": 5,
+      "writes": [
+        "qa/test-plans/"
+      ],
+      "depends_on": [],
+      "done_criteria": [
+        "One plan file for {{UC}} under qa/test-plans/",
+        "Every case is anchored to a spec section",
+        "Out-of-scope items (rate limits, External UCs) are stated, not tested"
+      ],
+      "accept": "ls qa/test-plans/{{UC}}-*.md",
+      "brief": "# Task plan: QA test plan for {{UC}}\n\n## Goal\nUse the `qa-test-planner` skill to write the QA test plan for {{UC}}.\n\n## Inputs the skill would otherwise ask for\n- Spec repo (local path): {{PROJECT}}\n- Target use case: {{UC}}\n- Jira ticket: <APAS20-xxx or none>\n\n## Files\n- **May write: qa/test-plans/ only.**\n\n## Done when\n- [ ] qa/test-plans/{{UC}}-*.md exists and follows the skill's format\n- [ ] Every case cites its spec anchor\n\n## Verify with\n`ls qa/test-plans/{{UC}}-*.md` and re-read the file against the skill's checklist\n"
+    },
+    {
+      "id": "scripts",
+      "title": "Human test scripts for {{UC}}",
+      "shape": "spec",
+      "skills": true,
+      "runtime": "headless",
+      "model": "sonnet",
+      "effort": "medium",
+      "budget_usd": 4,
+      "writes": [
+        "qa/scripts/"
+      ],
+      "depends_on": [
+        "plan"
+      ],
+      "done_criteria": [
+        "One scripts file for {{UC}} under qa/scripts/",
+        "Every plan case has executable steps",
+        "Missing fixtures are flagged as gaps, not invented"
+      ],
+      "accept": "ls qa/scripts/{{UC}}-*-scripts.md",
+      "brief": "# Task scripts: Human test scripts for {{UC}}\n\n## Goal\nUse the `qa-script-writer` skill to turn the plan from the previous task into human-executable scripts.\n\n## Inputs the skill would otherwise ask for\n- Spec repo (local path): {{PROJECT}}\n- Target plan: qa/test-plans/{{UC}}-*.md\n\n## Files\n- **May write: qa/scripts/ only.**\n\n## Verify with\n`ls qa/scripts/{{UC}}-*-scripts.md`, and check every plan case id appears in the scripts\n"
+    },
+    {
+      "id": "pytest",
+      "title": "Pytest scaffolds for {{UC}}",
+      "shape": "spec",
+      "skills": true,
+      "runtime": "headless",
+      "model": "sonnet",
+      "effort": "medium",
+      "budget_usd": 4,
+      "writes": [
+        "{{QA_AUTOMATION}}/tests/e2e_tests/"
+      ],
+      "add_dirs": [
+        "{{QA_AUTOMATION}}"
+      ],
+      "depends_on": [
+        "scripts"
+      ],
+      "done_criteria": [
+        "Test modules under tests/e2e_tests/uc_XX/",
+        "No rate-limit or stub-counter cases",
+        "Module headers pin the script-commit SHA"
+      ],
+      "accept": "cd \"{{QA_AUTOMATION}}\" && python3 -m pytest --collect-only -q tests/e2e_tests/ | tail -3",
+      "brief": "# Task pytest: Pytest scaffolds for {{UC}}\n\n## Goal\nUse the `qa-script-to-pytest` skill to scaffold pytest modules from the scripts written by the previous task.\n\n## Inputs the skill would otherwise ask for\n- Spec repo (local path): {{PROJECT}}\n- QA automation repo (local path): {{QA_AUTOMATION}}\n- Target script: qa/scripts/{{UC}}-*-scripts.md\n\n## Files\n- **May write: {{QA_AUTOMATION}}/tests/e2e_tests/ only.**\n\n## Verify with\n`cd \"{{QA_AUTOMATION}}\" && python3 -m pytest --collect-only -q tests/e2e_tests/`\n"
+    },
+    {
+      "id": "review",
+      "title": "Review the {{UC}} QA chain",
+      "shape": "review",
+      "runtime": "headless",
+      "model": "opus",
+      "effort": "high",
+      "budget_usd": 4,
+      "writes": [],
+      "add_dirs": [
+        "{{QA_AUTOMATION}}"
+      ],
+      "depends_on": [
+        "pytest"
+      ],
+      "done_criteria": [
+        "Traceability checked plan -> scripts -> pytest; gaps listed with file:line"
+      ],
+      "accept": "<command that verifies review findings against the specification and integration tests>",
+      "brief": "# Task review: Review the {{UC}} QA chain\n\n## Goal\nCheck that every case in the plan has script steps and a pytest scaffold (or a stated reason not to), that every case is spec-anchored, and that nothing out of scope was added. Do not edit files.\n\n## Files\n- **May write: nothing except your report.**\n\n## Verify with\nRead qa/test-plans/{{UC}}-*.md, qa/scripts/{{UC}}-*-scripts.md and {{QA_AUTOMATION}}/tests/e2e_tests/\n",
+      "specialist": "review"
+    }
+  ]
+}

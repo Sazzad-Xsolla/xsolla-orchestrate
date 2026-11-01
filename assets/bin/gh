@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# gh shim for orchestrate workers: GitHub CLI is off-limits to workers.
+echo "BLOCKED by orchestrator: workers may not use gh. Put the action under Proposed actions in your report instead." >&2
+exit 126

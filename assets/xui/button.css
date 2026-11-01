@@ -1,0 +1,196 @@
+/* from components/button.md */
+/* Base */
+.xui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: var(--xui-font-body);
+  font-weight: 500;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  position: relative;
+  white-space: nowrap;
+  outline: none;
+}
+.xui-btn:focus-visible {
+  outline: 2px solid var(--xui-border-brand);
+  outline-offset: 2px;
+}
+.xui-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.xui-btn--full-width { width: 100%; }
+.xui-btn--spread { justify-content: space-between; }
+
+/* Sizes */
+.xui-btn--xl { height: 64px; padding: 0 20px; font-size: 20px; border-radius: 8px; }
+.xui-btn--lg { height: 56px; padding: 0 20px; font-size: 18px; border-radius: 8px; }
+.xui-btn--md { height: 48px; padding: 0 20px; font-size: 16px; border-radius: 8px; }
+.xui-btn--sm { height: 40px; padding: 0 20px; font-size: 14px; border-radius: 4px; }
+.xui-btn--xs { height: 32px; padding: 0 20px; font-size: 12px; border-radius: 4px; }
+
+/* ── Brand tone ── */
+.xui-btn--primary.xui-btn--brand {
+  background: var(--xui-ctrl-brand-primary-bg);
+  border-color: var(--xui-ctrl-brand-primary-border);
+  color: var(--xui-ctrl-brand-text-primary);
+}
+.xui-btn--primary.xui-btn--brand:hover {
+  background: var(--xui-ctrl-brand-primary-bg-hover);
+  border-color: var(--xui-ctrl-brand-primary-border-hover);
+}
+.xui-btn--primary.xui-btn--brand:active { background: var(--xui-ctrl-brand-primary-bg-press); }
+
+.xui-btn--secondary.xui-btn--brand {
+  background: var(--xui-ctrl-brand-secondary-bg);
+  border-color: var(--xui-ctrl-brand-secondary-border);
+  color: var(--xui-ctrl-brand-text-secondary);
+}
+.xui-btn--secondary.xui-btn--brand:hover {
+  background: var(--xui-ctrl-brand-secondary-bg-hover);
+  border-color: var(--xui-ctrl-brand-secondary-border-hover);
+}
+
+.xui-btn--tertiary.xui-btn--brand {
+  background: var(--xui-ctrl-brand-tertiary-bg);
+  color: var(--xui-ctrl-brand-text-tertiary);
+}
+.xui-btn--tertiary.xui-btn--brand:hover { background: var(--xui-ctrl-brand-tertiary-bg-hover); }
+
+.xui-btn--ghost.xui-btn--brand {
+  background: var(--xui-ctrl-brand-ghost-bg);
+  color: var(--xui-ctrl-brand-text-ghost);
+  border-color: var(--xui-ctrl-brand-ghost-border);
+}
+.xui-btn--ghost.xui-btn--brand:hover {
+  background: var(--xui-ctrl-brand-ghost-bg-hover);
+  border-color: var(--xui-ctrl-brand-ghost-border-hover);
+}
+
+/* ── BrandExtra tone ── */
+.xui-btn--primary.xui-btn--brand-extra {
+  background: var(--xui-ctrl-brand-extra-primary-bg);
+  color: var(--xui-ctrl-brand-extra-text-primary);
+}
+.xui-btn--primary.xui-btn--brand-extra:hover { background: var(--xui-ctrl-brand-extra-primary-bg-hover); }
+.xui-btn--primary.xui-btn--brand-extra:active { background: var(--xui-ctrl-brand-extra-primary-bg-press); }
+
+.xui-btn--secondary.xui-btn--brand-extra {
+  background: var(--xui-ctrl-brand-extra-secondary-bg);
+  color: var(--xui-ctrl-brand-extra-text-secondary);
+}
+.xui-btn--secondary.xui-btn--brand-extra:hover { background: var(--xui-ctrl-brand-extra-secondary-bg-hover); }
+
+.xui-btn--tertiary.xui-btn--brand-extra {
+  background: var(--xui-ctrl-brand-extra-tertiary-bg);
+  color: var(--xui-ctrl-brand-extra-text-tertiary);
+}
+.xui-btn--tertiary.xui-btn--brand-extra:hover { background: var(--xui-ctrl-brand-extra-tertiary-bg-hover); }
+
+.xui-btn--ghost.xui-btn--brand-extra {
+  background: var(--xui-ctrl-brand-extra-ghost-bg);
+  color: var(--xui-ctrl-brand-extra-text-ghost);
+  border-color: var(--xui-ctrl-brand-extra-ghost-border);
+}
+.xui-btn--ghost.xui-btn--brand-extra:hover {
+  background: var(--xui-ctrl-brand-extra-ghost-bg-hover);
+  border-color: var(--xui-ctrl-brand-extra-ghost-border-hover);
+}
+
+/* ── Mono tone ── */
+.xui-btn--primary.xui-btn--mono {
+  background: var(--xui-ctrl-mono-primary-bg);
+  color: var(--xui-ctrl-mono-text-primary);
+}
+.xui-btn--primary.xui-btn--mono:hover { background: var(--xui-ctrl-mono-primary-bg-hover); }
+
+.xui-btn--secondary.xui-btn--mono {
+  background: var(--xui-ctrl-mono-secondary-bg);
+  border-color: var(--xui-ctrl-mono-secondary-border);
+  color: var(--xui-ctrl-mono-text-secondary);
+}
+.xui-btn--secondary.xui-btn--mono:hover {
+  background: var(--xui-ctrl-mono-secondary-bg-hover);
+  border-color: var(--xui-ctrl-mono-secondary-border-hover);
+}
+
+.xui-btn--tertiary.xui-btn--mono {
+  background: var(--xui-ctrl-mono-tertiary-bg);
+  color: var(--xui-ctrl-mono-text-tertiary);
+}
+.xui-btn--tertiary.xui-btn--mono:hover { background: var(--xui-ctrl-mono-tertiary-bg-hover); }
+
+.xui-btn--ghost.xui-btn--mono {
+  background: var(--xui-ctrl-mono-ghost-bg);
+  color: var(--xui-ctrl-mono-text-ghost);
+  border-color: var(--xui-ctrl-mono-ghost-border);
+}
+.xui-btn--ghost.xui-btn--mono:hover {
+  background: var(--xui-ctrl-mono-ghost-bg-hover);
+  border-color: var(--xui-ctrl-mono-ghost-border-hover);
+}
+
+/* ── Alert tone ── */
+.xui-btn--primary.xui-btn--alert {
+  background: var(--xui-ctrl-alert-primary-bg);
+  color: var(--xui-ctrl-alert-text-primary);
+}
+.xui-btn--primary.xui-btn--alert:hover { background: var(--xui-ctrl-alert-primary-bg-hover); }
+
+.xui-btn--secondary.xui-btn--alert {
+  background: var(--xui-ctrl-alert-secondary-bg);
+  color: var(--xui-ctrl-alert-text-secondary);
+}
+.xui-btn--secondary.xui-btn--alert:hover { background: var(--xui-ctrl-alert-secondary-bg-hover); }
+
+.xui-btn--tertiary.xui-btn--alert {
+  background: var(--xui-ctrl-alert-tertiary-bg);
+  color: var(--xui-ctrl-alert-text-tertiary);
+}
+.xui-btn--tertiary.xui-btn--alert:hover { background: var(--xui-ctrl-alert-tertiary-bg-hover); }
+
+.xui-btn--ghost.xui-btn--alert {
+  background: var(--xui-ctrl-alert-ghost-bg);
+  color: var(--xui-ctrl-alert-text-ghost);
+  border-color: var(--xui-ctrl-alert-ghost-border);
+}
+.xui-btn--ghost.xui-btn--alert:hover {
+  background: var(--xui-ctrl-alert-ghost-bg-hover);
+  border-color: var(--xui-ctrl-alert-ghost-border-hover);
+}
+
+/* ── Sublabel ── */
+.xui-btn__sublabel {
+  opacity: 0.4;
+  margin-left: 4px;
+}
+
+/* ── Icon sizing per button size ── */
+.xui-btn--xl .xui-btn__icon,
+.xui-btn--lg .xui-btn__icon { width: 32px; height: 32px; }
+.xui-btn--md .xui-btn__icon,
+.xui-btn--sm .xui-btn__icon { width: 28px; height: 28px; }
+.xui-btn--xs .xui-btn__icon { width: 24px; height: 24px; }
+
+/* ── Spinner ── */
+.xui-btn__spinner {
+  position: absolute;
+  width: 20px; height: 20px;
+  border: 2px solid currentColor;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  animation: xui-spin 0.8s linear infinite;
+}
+.xui-btn--loading .xui-btn__label { opacity: 0; }
+
+@keyframes xui-spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,21 @@
+<div class="shell">
+  <aside class="sidebar"><div class="brand">__LOGO__<strong>Field<br>Team</strong><small>Claude orchestration</small></div>
+    <nav aria-label="Run sections">
+      <button data-page="home" class="selected">Home</button><button data-page="party">Party</button><button data-page="activity">Activity</button><button data-page="approvals">Approvals <span id="approval-count"></span></button><button data-page="knowledge">Project memory</button>
+    </nav><div class="side-bottom"><span class="live-dot"></span> Local companion<br><small>xsolla-orchestrate</small></div>
+  </aside>
+  <main>
+    <header class="topbar"><div><p class="eyebrow">Your team, at a glance</p><h1 id="page-title">Mission control</h1></div><div class="connection-box"><span id="connection" role="status">Saved snapshot</span><small id="run-id"></small></div></header>
+    <div id="demo" class="demo" hidden>Demo run · Synthetic activity · No model calls or real actions</div>
+    <div id="notice" class="notice" role="status" hidden></div>
+    <div id="home-page" class="page">
+      <section class="goal-panel surface"><div class="goal-copy"><p class="eyebrow">Main goal</p><h2 id="goal"></h2><p id="run-title" class="muted"></p><div id="stats" class="stats"></div><button class="text-action" data-open="plan">View full plan <span aria-hidden="true">→</span></button></div><div id="orchestrator" class="orchestrator"></div></section>
+      <section id="party-section" class="party-section"><div class="section-header"><h2>Your party <small id="party-count"></small></h2><button class="text-action" data-page="party">View all →</button></div><div id="party" class="party-grid"></div></section>
+      <div class="bottom-grid"><section id="activity-section" class="surface"><div class="section-header"><h2><span class="live-dot"></span> Live activity</h2><label class="sr-only" for="activity-agent">Filter activity by agent</label><select id="activity-agent"><option value="">All agents</option></select></div><div id="activity" class="activity-list"></div><button class="text-action section-link" data-page="activity">Open full activity →</button></section><section id="attention-section" class="surface"><div class="section-header"><h2>Needs your decision</h2><small id="pending-count"></small></div><div id="attention"></div></section></div>
+    </div>
+    <div id="other-page" class="page" hidden></div>
+    <footer class="footnote"><label><input class="reduce-motion" type="checkbox"> Reduce motion</label><span id="updated"></span><span>Decisions record permission · Requested actions stay with Claude</span></footer>
+  </main>
+</div>
+<div id="widget" hidden><header class="widget-header"><div><strong>Field Team</strong><small id="widget-goal"></small></div><button class="text-action" id="widget-close" aria-label="Close party panel">×</button></header><div class="widget-tabs"><button data-widget-tab="party" class="selected">Party</button><button data-widget-tab="attention">Needs you <span id="widget-count"></span></button><button data-widget-tab="activity">Log</button></div><label class="widget-motion-controls"><input class="reduce-motion" type="checkbox"> Reduce motion</label><div id="widget-notice" role="status"></div><div id="widget-body"></div><footer class="widget-footer"><button class="text-action" id="open-mission">Open mission control →</button><small>Approvals record permission; Claude executes actions</small></footer></div>
+<dialog id="drawer" aria-labelledby="drawer-title"><div class="drawer-header"><h2 id="drawer-title"></h2><button class="text-action" id="drawer-close" aria-label="Close details">×</button></div><div id="drawer-content"></div></dialog>
