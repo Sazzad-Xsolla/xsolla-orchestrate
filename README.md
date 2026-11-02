@@ -2,31 +2,9 @@
 
 Source repository: [Sazzad-Xsolla/xsolla-orchestrate](https://github.com/Sazzad-Xsolla/xsolla-orchestrate).
 
-A local Claude Code mod and skill for coordinating AI workers. It plans and routes tasks, critiques briefs, monitors worker logs, brokers agent handoffs, and verifies results. Field Team now also runs in a native Claude pane, with a progress band above the prompt.
+A Claude Code orchestration skill with an optional Field Team interface. It plans and routes tasks, critiques briefs, monitors worker logs, brokers agent handoffs, and verifies results. Use the skill directly in Claude Code; Field Team provides an optional view of runs through a native pane, web dashboard, or macOS companion.
 
-## Claude Code mod
-
-Requires Claude Code 2.1.287 or later. From the project you want to work on, load this checkout as a plugin:
-
-```bash
-ORCH_ALLOW_UNWRAPPED=1 claude --plugin-dir /absolute/path/to/xsolla-orchestrate
-```
-
-Use `/xsolla-orchestrate:xsolla-orchestrate` with your task to invoke the bundled skill. Use `/field-team` to open the native pane, or `/field-team /absolute/path/to/run` to select a run. With no argument it follows the newest run in the current project. The pane has Party, Needs you, and Activity tabs. It reads the same runtime state as the web dashboard, including verified progress, recorded spend, worker model/effort, and request fingerprints. Synthetic runs are labeled as demonstrations.
-
-Interactive sessions refresh every five seconds and after a supervising turn. Refresh errors label the last snapshot as stale. Review in chat fills a draft for the user to submit; it neither approves nor executes a request. Run dispatch and acceptance continue through the bundled skill. The mod does not need the separate web server or macOS app. Loading the plugin does not start workers or make model calls. The existing standalone skill installation below remains supported; use either installation path to avoid duplicate skill listings.
-
-Validate and test the mod from this checkout:
-
-```bash
-claude plugin validate .
-claude plugin test .
-python3 -m unittest discover -s tests -v
-```
-
-Validated and tested with Claude Code 2.1.316. Native hook tests exercise terminal and desktop element trees; visual layout in an interactive Claude session still needs a pilot. The plugin has not been published to a marketplace. Directory submission checks report missing license, author, and icon metadata; choose these before publishing.
-
-## Start
+## Install the skill
 
 Python 3.9+, Bash, Git, curl, and Claude Code are required for live execution. Model access and authentication use the existing Claude installation. Headroom is optional. No Python packages or frontend build step are required for the skill.
 
@@ -88,7 +66,29 @@ Model routing chooses from the configured runtime aliases; the local doctor chec
 
 The UI includes Xsolla design tokens and official brand artwork from the supplied design system. Fonts load from the Xsolla CDN with system fallbacks, so viewing the page may make font requests. No logs or project records are sent to that CDN. Brand review is still required before company rollout.
 
-## Field Team dashboard and desktop companion
+## Optional native Field Team interface
+
+To use the skill with a native Field Team pane and a progress band above the prompt, load this checkout as a plugin. This optional installation path requires Claude Code 2.1.287 or later. From the project you want to work on:
+
+```bash
+ORCH_ALLOW_UNWRAPPED=1 claude --plugin-dir /absolute/path/to/xsolla-orchestrate
+```
+
+Use `/xsolla-orchestrate:xsolla-orchestrate` with your task to invoke the bundled skill. Use `/field-team` to open the native pane, or `/field-team /absolute/path/to/run` to select a run. With no argument it follows the newest run in the current project. The pane has Party, Needs you, and Activity tabs. It reads the same runtime state as the web dashboard, including verified progress, recorded spend, worker model/effort, and request fingerprints. Synthetic runs are labeled as demonstrations.
+
+Interactive sessions refresh every five seconds and after a supervising turn. Refresh errors label the last snapshot as stale. Review in chat fills a draft for the user to submit; it neither approves nor executes a request. Run dispatch and acceptance continue through the bundled skill. The native interface does not need the separate web server or macOS app. Loading the plugin does not start workers or make model calls. Choose either this plugin installation or the standalone skill installation above to avoid duplicate skill listings.
+
+Validate and test the optional plugin from this checkout:
+
+```bash
+claude plugin validate .
+claude plugin test .
+python3 -m unittest discover -s tests -v
+```
+
+Validated and tested with Claude Code 2.1.316. Native hook tests exercise terminal and desktop element trees; visual layout in an interactive Claude session still needs a pilot. The plugin has not been published to a marketplace. Directory submission checks report missing license, author, and icon metadata; choose these before publishing.
+
+## Optional Field Team dashboard and desktop companion
 
 The local run view now implements the approved Field Team layout: a goal and orchestrator summary, a creature party with Claude model/effort/goal/status, recent activity, agent details, and Approve/Deny controls. A browser and desktop widget watching the same run share decisions. Approvals record permission only; supervising Claude executes authorized actions separately.
 
