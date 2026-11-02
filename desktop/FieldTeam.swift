@@ -4,7 +4,7 @@ import WebKit
 func tint(_ hex: UInt32) -> NSColor {
     NSColor(srgbRed: CGFloat((hex >> 16) & 255)/255, green: CGFloat((hex >> 8) & 255)/255, blue: CGFloat(hex & 255)/255, alpha: 1)
 }
-let teal = tint(0x141d1f), cyan = tint(0x80eaff), amber = tint(0xffc380)
+let teal = tint(0x234f63), cyan = tint(0x80eaff), amber = tint(0xffc380)
 
 class TeamPanel: NSPanel {
     override var canBecomeKey: Bool { true }
@@ -23,6 +23,7 @@ class CompanionView: NSView {
     var motionState = "idle"
     var effect = "none"
     var effectAt = 0.0
+    var poseStarted = Date.timeIntervalSinceReferenceDate
     var anchor = NSPoint.zero
     var windowAnchor = NSPoint.zero
     var didDrag = false
@@ -33,15 +34,42 @@ class CompanionView: NSView {
         setAccessibilityElement(true)
         setAccessibilityRole(.button)
         setAccessibilityLabel("Field Team companion — click to open party, drag to move")
-        if let url=Bundle.main.url(forResource:"motion-sprites",withExtension:"png"),
-           let image=NSImage(contentsOf:url),let cg=image.cgImage(forProposedRect:nil,context:nil,hints:nil) {
-            let w=CGFloat(cg.width)/4,h=CGFloat(cg.height)/2
-            for row in 0..<2 { for col in 0..<4 {
-                let rect=CGRect(x:CGFloat(col)*w,y:CGFloat(row)*h,width:w,height:h)
-                if let part=cg.cropping(to:rect) {frames.append(NSImage(cgImage:part,size:NSSize(width:w,height:h)))}
+        if let url=Bundle.main.url(forResource:"cozy-motion",withExtension:"png"),
+           let image=NSImage(contentsOf:url),let cg=image.cgImage(forProposedRect:nil,context:nil,hints:nil),
+           let pixelData=cg.dataProvider?.data,let bytes=CFDataGetBytePtr(pixelData) {
+            let width=cg.width,height=cg.height,stride=cg.bytesPerRow
+            let rowCuts=height==887 ? [0,254,470,680,887] : [0,height/4,height/2,height*3/4,height]
+            let tileWidth=CGFloat(width)/8
+            // Generated poses have uneven spacing. Cut in the transparent gutters,
+            // then retain the original anchors inside a padded canvas.
+            let columnCuts = width==1774 ? [
+                [0,229,448,667,887,1109,1332,1554,1774],
+                [0,232,455,675,898,1118,1336,1556,1774],
+                [0,232,452,673,889,1111,1330,1548,1774],
+                [0,229,446,671,885,1105,1327,1551,1774]
+            ] : (0..<4).map { _ in (0...8).map { Int(CGFloat($0)*tileWidth) } }
+            for row in 0..<4 { for col in 0..<8 {
+                let left=columnCuts[row][col],right=columnCuts[row][col+1]
+                var x0=right,x1=left,y0=rowCuts[row+1],y1=rowCuts[row]
+                if cg.bitsPerPixel==32 {
+                    for y in rowCuts[row]..<rowCuts[row+1] { for x in left..<right {
+                        if bytes[y*stride+x*4+3]>32 {
+                            x0=min(x0,x);x1=max(x1,x);y0=min(y0,y);y1=max(y1,y)
+                        }
+                    }}
+                }
+                let canvas=NSImage(size:NSSize(width:tileWidth+24,height:210))
+                if x1>=x0 && y1>=y0,let part=cg.cropping(to:CGRect(x:x0,y:y0,width:x1-x0+1,height:y1-y0+1)) {
+                    let sprite=NSImage(cgImage:part,size:NSSize(width:part.width,height:part.height))
+                    canvas.lockFocus()
+                    NSGraphicsContext.current?.imageInterpolation = .none
+                    sprite.draw(in:NSRect(x:CGFloat(x0)-CGFloat(col)*tileWidth+12,y:4,width:CGFloat(part.width),height:CGFloat(part.height)))
+                    canvas.unlockFocus()
+                }
+                frames.append(canvas)
             }}
         }
-        timer=Timer.scheduledTimer(withTimeInterval:0.08,repeats:true) { [weak self] _ in
+        timer=Timer.scheduledTimer(withTimeInterval:1.0/60.0,repeats:true) { [weak self] _ in
             guard let self=self,!self.reducedMotion else {return}
             self.needsDisplay=true
         }
@@ -56,36 +84,36 @@ class CompanionView: NSView {
     }
     override func draw(_ dirtyRect:NSRect) {
         let now=Date.timeIntervalSinceReferenceDate,elapsed=now-effectAt
-        let transient=elapsed<1.1 ? effect : "none"
-        var col=motionState=="attention" ? 2 : motionState=="working" ? 1 : 0
-        var row=0
-        var hop:CGFloat=0
-        if !reducedMotion {
-            if transient=="complete" {col=3;row=elapsed>0.35 && elapsed<0.8 ? 1 : 0}
-            else if transient=="attention" {col=2;row=elapsed>0.25 && elapsed<0.75 ? 1 : 0}
-            else if motionState=="working" {row=Int(now*1.7)%2}
-            else if col==0 {row=now.truncatingRemainder(dividingBy:7)>6.65 ? 1 : 0}
-            if transient=="complete" || transient=="attention" {hop=CGFloat(max(0,sin(min(elapsed/0.65,1)*Double.pi)))*8}
-            else if col==0 {hop=CGFloat(sin(now*1.8))*0.8}
+        let pose=MotionPose.sample(state:motionState,effect:effect,effectTime:elapsed,clock:now-poseStarted,reduced:reducedMotion)
+        NSGraphicsContext.current?.imageInterpolation = .high
+        let index=pose.row*8+pose.frame
+        if frames.indices.contains(index) {
+            let scale = CGFloat(pose.scaleY)
+            // The source canvas has a four-pixel foot gutter. Keep the visible
+            // foot baseline fixed as the top moves by less than one pixel.
+            let gutter = CGFloat(4.0 / 210.0 * 140.0)
+            frames[index].draw(in:NSRect(x:28,y:29-gutter*(scale-1),width:164,height:140*scale))
         }
-        NSGraphicsContext.current?.imageInterpolation = .none
-        let index=row*4+col
-        if frames.indices.contains(index) {frames[index].draw(in:NSRect(x:42,y:26+hop,width:138,height:138))}
         let box=NSRect(x:13,y:2,width:192,height:24)
-        teal.setFill();NSBezierPath(rect:box).fill()
-        cyan.setStroke();let border=NSBezierPath(rect:box.insetBy(dx:2,dy:2));border.lineWidth=1;border.stroke()
-        let label = !connected ? "CONNECTING…" : attention>0 ? "\(active) WORKING · \(attention) NEEDS YOU" : motionState=="complete" ? "MISSION VERIFIED" : active>0 ? "\(active) AGENTS WORKING" : "TEAM READY"
-        (label as NSString).draw(at:NSPoint(x:22,y:7),withAttributes:[.font:NSFont.monospacedSystemFont(ofSize:9,weight:.bold),.foregroundColor:NSColor.white])
+        tint(0xfff4dc).setFill();NSBezierPath(roundedRect:box,xRadius:4,yRadius:4).fill()
+        tint(0xbba27a).setStroke()
+        let border=NSBezierPath(roundedRect:box.insetBy(dx:0.5,dy:0.5),xRadius:4,yRadius:4);border.lineWidth=1;border.stroke()
+        let label = !connected ? "Connecting…" : attention>0 ? "\(active) working · \(attention) needs you" : motionState=="complete" ? "Mission verified" : active>0 ? "\(active) agents working" : "Your party is ready"
+        (label as NSString).draw(at:NSPoint(x:22,y:7),withAttributes:[.font:NSFont.systemFont(ofSize:10,weight:.medium),.foregroundColor:teal])
         if attention>0 {
-            amber.setFill();NSBezierPath(rect:NSRect(x:171,y:105,width:20,height:22)).fill()
-            ("!" as NSString).draw(at:NSPoint(x:178,y:108),withAttributes:[.font:NSFont.monospacedSystemFont(ofSize:13,weight:.bold),.foregroundColor:teal])
+            let envelope=NSRect(x:178,y:105,width:22,height:17)
+            tint(0xf4d393).setFill();NSBezierPath(roundedRect:envelope,xRadius:3,yRadius:3).fill()
+            tint(0x876b41).setStroke()
+            let letter=NSBezierPath();letter.move(to:NSPoint(x:181,y:118));letter.line(to:NSPoint(x:189,y:111));letter.line(to:NSPoint(x:197,y:118));letter.lineWidth=1;letter.stroke()
         }
-        if transient != "none" {
-            let text=transient=="attention" ? "Your party needs you" : transient=="complete" ? "Mission complete" : "New activity"
-            let rect=NSRect(x:22,y:145,width:176,height:23)
-            tint(0xfffbed).setFill();NSBezierPath(rect:rect).fill()
-            teal.setStroke();NSBezierPath(rect:rect).stroke()
-            (text as NSString).draw(at:NSPoint(x:29,y:151),withAttributes:[.font:NSFont.monospacedSystemFont(ofSize:10,weight:.medium),.foregroundColor:teal])
+        let transient=(effect=="attention" || effect=="complete") && elapsed<2.25 || effect=="log" && elapsed<1.8
+        if transient {
+            let text=effect=="attention" ? "Your party needs you" : effect=="complete" ? "A good day's work" : "New activity"
+            let rise:CGFloat = reducedMotion ? 0 : CGFloat(1-pow(1-min(elapsed/0.3,1),3))*3
+            let rect=NSRect(x:22,y:143+rise,width:176,height:22)
+            tint(0xfff4dc).setFill();NSBezierPath(roundedRect:rect,xRadius:4,yRadius:4).fill()
+            tint(0xbba27a).setStroke();NSBezierPath(roundedRect:rect,xRadius:4,yRadius:4).stroke()
+            (text as NSString).draw(at:NSPoint(x:30,y:149+rise),withAttributes:[.font:NSFont.systemFont(ofSize:10,weight:.medium),.foregroundColor:teal])
         }
     }
     override func mouseDown(with event:NSEvent) {anchor=NSEvent.mouseLocation;windowAnchor=window?.frame.origin ?? .zero;didDrag=false}
@@ -139,7 +167,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler, WKNa
         web=WKWebView(frame:.zero,configuration:config)
         web.navigationDelegate=self
         web.setValue(false,forKey:"drawsBackground")
-        web.appearance=NSAppearance(named:.darkAqua)
+        web.appearance=NSAppearance(named:.aqua)
         detailWindow.contentView=web
         statusItem=NSStatusBar.system.statusItem(withLength:NSStatusItem.variableLength)
         rebuildMenu(); showMessage("Connecting to Field Team…")
@@ -154,14 +182,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler, WKNa
     }
     func panel(_ size: NSSize, transparent: Bool=false) -> TeamPanel {
         let p=TeamPanel(contentRect:NSRect(origin:.zero,size:size),styleMask:[.borderless,.nonactivatingPanel],backing:.buffered,defer:false)
-        p.level = .floating; p.isOpaque=false; p.backgroundColor=transparent ? .clear : teal
+        p.level = .floating; p.isOpaque=false; p.backgroundColor=transparent ? .clear : tint(0xfff7e6)
         p.hasShadow = !transparent; p.isReleasedWhenClosed=false
         p.collectionBehavior=[.canJoinAllSpaces,.fullScreenAuxiliary]
         return p
     }
     func showMessage(_ text: String) {
         let escaped=text.replacingOccurrences(of:"&",with:"&amp;").replacingOccurrences(of:"<",with:"&lt;")
-        web?.loadHTMLString("<body style='background:#141d1f;color:#e8eced;font:14px -apple-system;padding:24px'><h2>Field Team</h2><p>\(escaped)</p><p>Use the menu bar to choose a run or the updated skill folder.</p></body>",baseURL:nil)
+        web?.loadHTMLString("<body style='background:#fff6df;color:#234f63;font:14px -apple-system;padding:24px;border:6px double #a57950'><h2>Field Team</h2><p>\(escaped)</p><p>Use the menu bar to choose a run or the updated skill folder.</p></body>",baseURL:nil)
         loadedURL=nil
     }
     func savePosition() {
@@ -217,13 +245,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler, WKNa
             let process=Process(), pipe=Pipe()
             process.executableURL=URL(fileURLWithPath:"/usr/bin/python3")
             process.arguments=[self.resources.appendingPathComponent("bridge.py").path,"--skill",selectedSkill]+(selectedRun != nil ? ["--run",selectedRun!] : ["--demo-project",demoProject])
-            process.standardOutput=pipe;process.standardError=FileHandle.nullDevice
+            process.standardOutput=pipe;process.standardError=pipe
             let deadline=DispatchWorkItem {if process.isRunning {process.terminate()}}
             var result:[String:Any]=[:]
             do {
                 try process.run();DispatchQueue.global().asyncAfter(deadline:.now()+18,execute:deadline)
                 let bytes=pipe.fileHandleForReading.readDataToEndOfFile();process.waitUntilExit();deadline.cancel()
-                result=(try? JSONSerialization.jsonObject(with:bytes) as? [String:Any]) ?? ["error":"Cannot read run data"]
+                result=BridgeResponse.decode(bytes,exit:process.terminationStatus)
             } catch {result=["error":error.localizedDescription]}
             let object=result
             DispatchQueue.main.async {

@@ -1,0 +1,6 @@
+{
+  "name": "xsolla-orchestrate",
+  "version": "0.1.0",
+  "description": "Xsolla orchestration with a native Field Team pane and live run progress in Claude Code.",
+  "skills": "./skills/"
+}

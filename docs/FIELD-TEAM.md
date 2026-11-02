@@ -1,5 +1,24 @@
 # Field Team implementation
 
+## Stable companion motion — November 2, 2026
+
+Supersedes the pose-loop updates below. The independently generated frames varied in position and silhouette; reversing them created visible rewind and sliding. The companion now uses one resting drawing across all states, with continuous 5.6-second breathing limited to 0.4% vertical scale (0.56 screen points). The visible foot baseline stays fixed. Smooth image interpolation and a 60 Hz refresh replace stepped pose swaps. State and effect changes do not restart the breathing clock or swap artwork. Reduced motion keeps the same drawing completely still. The existing envelope, status label and event notices continue to communicate work, requests and completion.
+
+The pose regression check covers artwork stability across states and events, displacement bounds, continuity at loop seams and reduced motion. This is restrained procedural motion, not new hand-animated character frames.
+
+
+## Cozy Xsolla theme — November 1, 2026
+
+Version 0.3 finishes the warm parchment/sage/honey design with blue navigation, restrained cyan actions, the supplied official Xsolla SVG, and the registered Pilat Wide/Aktiv Grotesk font stacks. Character art uses ordinary fabric and equipment details without prominent branding. Atlas has a dedicated transparent portrait asset rendered directly as an image, replacing the concept-board viewport. A separate field-station environment asset adds atmosphere without replacing the goal or operational data.
+
+The desktop companion uses 32 newly generated poses, eight each for idle, working, notification, and completion. Runtime alpha-bound alignment keeps feet on a shared baseline. Uneven frame holds give long quiet pauses, staggered blinks and ear movements, a brief attentive response, and a single settling celebration. A small envelope marks pending decisions. Reduced motion renders a stable pose, and all existing new-event deduplication remains in place. `MotionPose.swift` keeps timing separate from state tracking; its 12 additional assertions verify all eight frames, long idle holds, finite gestures, settling, and reduced motion.
+
+The alternative themes and switcher remain isolated under `theme-lab/`. They are preserved for later integration. The main app currently ships the cozy theme only, per the latest user direction. Do not build the lab app over the main output or run both with the same bundle identifier during verification.
+
+Artwork was generated with built-in ImageGen. The cleaned concept board is stored under `outputs/field-team-concepts/cozy-xsolla-clean-v3.png`. Dedicated production assets live under `assets/field-team/`: `atlas-portrait.png`, `field-station.png`, and `cozy-motion.png`. The concept board supplies the three creature portrait viewports; Atlas no longer comes from that board. Prompts are recorded alongside the output concepts. No live Claude workers or paid Claude completions were used to validate this visual update.
+
+The finished app and browser dashboard were inspected with the warm palette, official UI logo, unbranded character portraits, and the dedicated Atlas avatar. The previous theme-lab process was closed before relaunching the main app to avoid the shared bundle identifier selecting the wrong executable. The native bridge now tolerates diagnostic lines around its JSON response and retains actionable exit diagnostics; five additional Swift assertions cover response decoding. All 31 Python regression tests passed. The separate nine browser motion scenarios, thirteen native transition assertions, and twelve cozy-pose assertions passed. The theme picker is deliberately deferred.
+
 ## RPG and motion update — November 1, 2026
 
 Version 0.2 applies the approved cream/mint/dark-teal handheld RPG palette and menu frames to dashboard, detail drawers, and the native widget. Pixel portraits are displayed through clipped SVG viewports from the approved dashboard concept, retaining the source PNG. The desktop companion uses the generated eight-frame pixel Atlas/Pip atlas from the approved motion preview.
@@ -70,3 +89,15 @@ Audience: developers. Voice: direct, low brightness. Labels reviewed across mean
 `assets/field-team/characters.png` is an original transparent sprite atlas generated with the built-in ImageGen tool from the approved Claude-only concept board. Atlas, Pip, Rivet, and Aegis replace franchise artwork. Native and SVG viewports select atlas regions at runtime; the generated source image is preserved.
 
 Generation prompt: “Production sprite atlas for approved Xsolla Field Team characters; transparent 2×2 grid, full-body Atlas trainer top left, Pip scout top right, Rivet builder bottom left, Aegis guardian bottom right; crisp smooth illustrated game sprites, dark teal/cyan uniform details, no text, UI, scenery, or existing franchise symbols.”
+
+### Sprite boundary fix — November 2, 2026
+
+The desktop companion and motion preview use per-row column boundaries in transparent gutters, plus 24 pixels of horizontal canvas padding. This preserves complete silhouettes and prevents neighboring ears leaking into a pose. All 32 poses were checked for clear side gutters and canvas clipping.
+
+### Continuous idle and work loops — November 2, 2026
+
+Idle and working sequences now return through their intermediate poses and end on the opening pose. Loop seams match exactly, with a quiet hold at rest. The native renderer samples at 25 fps; reduced motion remains a fixed pose. Twenty pose assertions cover both continuous loop seams, adjacent-frame steps, pose coverage, and one-shot reactions.
+
+### Cozy mockup fidelity — November 2, 2026
+
+The shared visual layer in `assets/cozy-world.css` brings the approved concept into both Mission Control and the native party panel: wood outer frames, stepped parchment borders, a scenic goal backdrop, illustrated sidebar scenery, cyan inset controls, and compact party rows with recorded creature levels. It is kept separate for the deferred theme picker. Existing run data, goals, models, efforts, activity, and approval behavior are unchanged. No XP values are fabricated. The 31 Python regression tests passed; desktop app rebuilt and signed.

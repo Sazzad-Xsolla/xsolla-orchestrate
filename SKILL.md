@@ -49,6 +49,8 @@ Workers propose consequential external actions in their report. Show the exact t
 
 ## Optional Field Team companion
 
+When installed as a Claude Code plugin, `/field-team` opens the native mod pane with Party, Needs you, and Activity tabs. It follows this project's newest run; pass an absolute run path to pin one. The progress band and pane refresh from the runtime records. Review in chat fills a draft for the user to submit and does not record authorization or execute an action. The plugin skill entrypoint lives in `skills/xsolla-orchestrate/`; its `SKILL` path is the plugin root, where these scripts live.
+
 The workflow is fully usable in Claude and `STATUS.md`. When requested, start `python3 SKILL/scripts/serve_dashboard.py RUN --theme xsolla` and share the printed localhost URL. Field Team shows the main goal, orchestrator, creature party, Claude models and efforts, live activity, agent details, and decisions. The optional macOS desktop companion is built with `bash SKILL/desktop/build.sh OUTPUT_DIRECTORY`; select the same run or project in its menu. It starts only the local view server, never workers. No hosted deployment is included.
 
 Record the actual supervising identity in optional `plan.json.orchestrator` fields: `name`, `model`, `effort`, `status`, and `summary`. Keep the status and summary current at orchestration checkpoints. Do not invent a model, effort, heartbeat, or level for the view. Task `objective`, route, and worker logs supply agent goals and activity; optional `character` metadata supplies a display name, species (`pip`, `rivet`, `aegis`), and level. Character identity does not change model routing or permissions.

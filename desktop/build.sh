@@ -9,9 +9,9 @@ BUILD_DIR="$OUTPUT_DIR/field-team-build"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources/runtime" "$BUILD_DIR/cache" "$BUILD_DIR/tmp"
 export TMPDIR="$BUILD_DIR/tmp/"
 python3 "$SKILL_ROOT/scripts/build_view.py"
-swiftc "$SKILL_ROOT/desktop/MotionState.swift" "$SKILL_ROOT/desktop/FieldTeam.swift" -o "$APP/Contents/MacOS/FieldTeam" -module-cache-path "$BUILD_DIR/cache" -framework AppKit -framework WebKit -O
+swiftc "$SKILL_ROOT/desktop/BridgeResponse.swift" "$SKILL_ROOT/desktop/MotionPose.swift" "$SKILL_ROOT/desktop/MotionState.swift" "$SKILL_ROOT/desktop/FieldTeam.swift" -o "$APP/Contents/MacOS/FieldTeam" -module-cache-path "$BUILD_DIR/cache" -framework AppKit -framework WebKit -O
 cp "$SKILL_ROOT/desktop/bridge.py" "$APP/Contents/Resources/bridge.py"
-cp "$SKILL_ROOT/assets/field-team/motion-sprites.png" "$APP/Contents/Resources/motion-sprites.png"
+cp "$SKILL_ROOT/assets/field-team/cozy-motion.png" "$APP/Contents/Resources/cozy-motion.png"
 printf '%s\n' "$SKILL_ROOT" > "$APP/Contents/Resources/skill-path.txt"
 for folder in scripts assets config profiles references prototypes; do
     mkdir -p "$APP/Contents/Resources/runtime/$folder"
@@ -26,8 +26,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <key>CFBundleDisplayName</key><string>Xsolla Field Team</string>
 <key>CFBundleIdentifier</key><string>local.xsolla.fieldteam</string>
 <key>CFBundleExecutable</key><string>FieldTeam</string>
-<key>CFBundleVersion</key><string>2</string>
-<key>CFBundleShortVersionString</key><string>0.2.0</string>
+<key>CFBundleVersion</key><string>3</string>
+<key>CFBundleShortVersionString</key><string>0.3.0</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>

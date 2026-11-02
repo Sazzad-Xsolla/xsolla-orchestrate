@@ -1,6 +1,30 @@
 # Xsolla orchestrate
 
-A local Claude Code skill for coordinating AI workers. It plans and routes tasks, critiques briefs, monitors worker logs, brokers agent handoffs, and verifies results. The optional Xsolla run view presents the same records; the main workflow stays in Claude.
+Source repository: [Sazzad-Xsolla/xsolla-orchestrate](https://github.com/Sazzad-Xsolla/xsolla-orchestrate).
+
+A local Claude Code mod and skill for coordinating AI workers. It plans and routes tasks, critiques briefs, monitors worker logs, brokers agent handoffs, and verifies results. Field Team now also runs in a native Claude pane, with a progress band above the prompt.
+
+## Claude Code mod
+
+Requires Claude Code 2.1.287 or later. From the project you want to work on, load this checkout as a plugin:
+
+```bash
+ORCH_ALLOW_UNWRAPPED=1 claude --plugin-dir /absolute/path/to/xsolla-orchestrate
+```
+
+Use `/xsolla-orchestrate:xsolla-orchestrate` with your task to invoke the bundled skill. Use `/field-team` to open the native pane, or `/field-team /absolute/path/to/run` to select a run. With no argument it follows the newest run in the current project. The pane has Party, Needs you, and Activity tabs. It reads the same runtime state as the web dashboard, including verified progress, recorded spend, worker model/effort, and request fingerprints. Synthetic runs are labeled as demonstrations.
+
+Interactive sessions refresh every five seconds and after a supervising turn. Refresh errors label the last snapshot as stale. Review in chat fills a draft for the user to submit; it neither approves nor executes a request. Run dispatch and acceptance continue through the bundled skill. The mod does not need the separate web server or macOS app. Loading the plugin does not start workers or make model calls. The existing standalone skill installation below remains supported; use either installation path to avoid duplicate skill listings.
+
+Validate and test the mod from this checkout:
+
+```bash
+claude plugin validate .
+claude plugin test .
+python3 -m unittest discover -s tests -v
+```
+
+Validated and tested with Claude Code 2.1.316. Native hook tests exercise terminal and desktop element trees; visual layout in an interactive Claude session still needs a pilot. The plugin has not been published to a marketplace. Directory submission checks report missing license, author, and icon metadata; choose these before publishing.
 
 ## Start
 
@@ -56,7 +80,7 @@ The demonstration uses synthetic worker logs and exercises routing, handoff mess
 python3 -m unittest discover -s tests -v
 ```
 
-`SKILL.md` is the Claude entrypoint. Runtime code is in `scripts/`, routing policy in `config/routing.json`, specialist definitions in `profiles/`, and the optional view in `prototypes/xsolla-run.html`. The original runtime baseline and revision are recorded in `UPSTREAM.json`. Project records are isolated under `.xsolla-orchestrator/`; the checkout has no remote configured.
+`SKILL.md` is the Claude entrypoint. Runtime code is in `scripts/`, routing policy in `config/routing.json`, specialist definitions in `profiles/`, and the optional view in `prototypes/xsolla-run.html`. The original runtime baseline and revision are recorded in `UPSTREAM.json`. Project records are isolated under `.xsolla-orchestrator/`.
 
 ## Working boundaries
 
@@ -79,5 +103,9 @@ Open `Xsolla Field Team.app`, then use **Choose run or project…** in its menu.
 See [Field Team implementation notes](docs/FIELD-TEAM.md) for metadata, decision semantics, validation, and limits. Legacy Run-Dex remains separate. Global skill installation is still explicit and uses the installer above.
 
 Field Team 0.2 uses the approved cream-and-teal RPG style, pixel party portraits, and animated trainer/Pip poses. Idle blinks, working gestures, new-request alerts, completion celebrations, and log cues follow run events. Repeated polling does not replay notifications. The widget and dashboard offer Reduce motion, and macOS reduced motion is respected.
+
+Field Team 0.3 refines this into the warm Xsolla field-journal design: parchment and sage surfaces, blue navigation, restrained cyan actions, unbranded character art, a dedicated Atlas portrait, and eight-frame companion gestures with longer quiet pauses. The other theme work is preserved separately under `theme-lab/`; a theme picker will be integrated later.
+
+The November 2 motion revision replaces generated pose cycling with one stable drawing and subtle, continuous breathing anchored at the feet. Requests and completions use the existing envelope and notices; reduced motion keeps the drawing still. Earlier pose-animation descriptions above are historical.
 
 Live model execution and account-specific compatibility require a pilot. See `docs/IMPLEMENTATION.md` for the delivery checklist and remaining work.

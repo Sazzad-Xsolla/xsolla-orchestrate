@@ -1,6 +1,7 @@
 /* Field Team shares one snapshot and one decision API across browser and widget. */
 let data = "__DATA__";
 const characterSheet = "__CHARACTERS__";
+const atlasPortrait = "__ATLAS_PORTRAIT__";
 const sessionToken = "__SESSION__";
 const widgetMode = new URLSearchParams(location.search).get('widget') === '1';
 const live = location.protocol === 'http:' && sessionToken !== '__' + 'SESSION__';
@@ -33,8 +34,9 @@ document.addEventListener('change',e=>{
   window.webkit?.messageHandlers?.fieldTeam?.postMessage({action:'motion',value:String(reduceMotion)});
 });
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const crops = {atlas:[998,150,125,145],pip:[219,403,165,159],rivet:[641,408,168,154],aegis:[1067,407,160,156]};
+const crops = {atlas:[870,219,112,107],pip:[196,446,120,138],rivet:[531,446,115,138],aegis:[852,447,121,138]};
 function sprite(kind, extra='') {
+  if(kind==='atlas') return `<img class="sprite avatar-portrait ${extra}" src="${atlasPortrait}" alt="" aria-hidden="true">`;
   const box = crops[kind] || crops.rivet;
   return `<svg class="sprite ${extra}" aria-hidden="true" viewBox="${box.join(' ')}"><svg x="${box[0]}" y="${box[1]}" width="${box[2]}" height="${box[3]}" viewBox="${box.join(' ')}" overflow="hidden"><image href="${characterSheet}" width="1536" height="1024"/></svg></svg>`;
 }
@@ -162,7 +164,7 @@ function renderWidget() {
   $('widget-goal').textContent=data.goal || data.title || 'Choose a run to connect';
   $('widget-count').textContent=pending().length || '';
   document.querySelectorAll('[data-widget-tab]').forEach(el=>el.classList.toggle('selected',el.dataset.widgetTab===widgetTab));
-  if(widgetTab==='party') $('widget-body').innerHTML=workers().map(w=>`<button class="widget-row" data-widget-agent="${esc(w.id)}">${sprite(character(w).species)}<div><strong>${esc(character(w).name)}</strong><small> · ${esc(w.id)}</small>${tags(w)}${status(w)}<p class="summary">Goal: ${esc(w.objective)}</p><p class="summary">${esc(nowText(w).slice(0,130))}</p></div></button>`).join('') || empty('No agents in this run');
+  if(widgetTab==='party') $('widget-body').innerHTML=workers().map(w=>`<button class="widget-row" data-widget-agent="${esc(w.id)}">${sprite(character(w).species)}<div><strong>${esc(character(w).name)}</strong><small>${character(w).level != null ? " · Lv. "+esc(character(w).level) : " · "+esc(w.id)}</small>${tags(w)}${status(w)}<p class="summary">Goal: ${esc(w.objective)}</p><p class="summary">${esc(nowText(w).slice(0,130))}</p></div></button>`).join('') || empty('No agents in this run');
   if(widgetTab==='attention') $('widget-body').innerHTML=attention();
   if(widgetTab==='activity') $('widget-body').innerHTML=(data.activity||[]).slice(0,20).map(e=>`<article class="detail-event"><small>${esc(time(e.at))} · ${esc(e.agent)}</small><p>${esc(e.text.slice(0,350))}</p></article>`).join('') || empty('No activity recorded');
 }

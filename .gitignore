@@ -14,3 +14,6 @@ history.jsonl
 __pycache__/
 *.pyc
 .DS_Store
+
+# Claude Code generates version-specific mod declarations on load.
+.claude-plugin/types/
