@@ -32,6 +32,8 @@ From the project you want to work on, launch `ORCH_ALLOW_UNWRAPPED=1 claude` if 
 
 These are prompts for the skill, not separate fixed subcommands. The supervising Claude conversation plans, routes, critiques, dispatches, and verifies the work. The desktop app only observes runs and records permission decisions.
 
+Independent workers launch together (up to four) through `python3 scripts/dispatch_wave.py RUN TASK_A TASK_B`, after plan confirmation and brief critiques. The helper starts every listed dispatcher before waiting. Workers use separate `claude -p` processes through Bash, including when the supervisor is in automode; native Agent/Task tools are not required. The supervisor's permissions still need to allow the launcher command. Real dependencies wait for verified output; independent workers do not wait for each other's review.
+
 Useful terminal commands (replace `PROJECT` and `RUN` with actual paths):
 
 ```bash

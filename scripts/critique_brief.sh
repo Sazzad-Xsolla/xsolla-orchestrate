@@ -8,6 +8,7 @@ RUN="$(cd "${1:?run_dir}" && pwd)"
 TASK="${2:?task_id}"
 SKILL="$(cd "$(dirname "$0")/.." && pwd)"
 source "$SKILL/scripts/lib.sh"
+python3 "$SKILL/scripts/dispatch_approval.py" "$RUN" check >/dev/null
 W="$RUN/workers/$TASK"
 [ -s "$W/brief.md" ] || { echo "missing brief: $W/brief.md" >&2; exit 2; }
 

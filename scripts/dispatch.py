@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 import coordinate
+from dispatch_approval import require_approval
 import memory
 from control import atomic_json, load_run, locked_json, now, orchestrator_only, read_json, task_by_id
 
@@ -37,6 +38,7 @@ def write_paths(task, project):
 
 
 def validate(run, plan, project, task_id):
+    require_approval(run, plan)
     task = task_by_id(plan, task_id)
     if task.get("state", "planned") not in ("planned", "failed", "blocked"):
         raise ValueError("Task is not ready for dispatch; review or recover it first")

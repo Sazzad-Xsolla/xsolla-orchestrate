@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import control
 import coordinate
 import dispatch
+import dispatch_approval
 import memory
 import route
 import status
@@ -51,6 +52,9 @@ class OrchestrationTests(unittest.TestCase):
         control.atomic_json(self.run / "plan.json", self.plan)
 
     def critique(self, task):
+        self.plan["dispatch_confirmation"] = {"source": "chat", "confirmation": "Approve the test plan",
+                                               "fingerprint": dispatch_approval.fingerprint(self.run, self.plan)}
+        self.save()
         control.atomic_json(self.run / "workers" / task["id"] / "critique-audit.json",
                             {"verdict": "clear", "fingerprint": dispatch.critique_fingerprint(self.run, task)})
 
@@ -70,7 +74,7 @@ class OrchestrationTests(unittest.TestCase):
             dispatch.validate(self.run, self.plan, self.project, "impl")
         self.critique(self.tasks[0])
         self.tasks[0]["accept"] = "test -f another-file"
-        with self.assertRaisesRegex(ValueError, "critique"):
+        with self.assertRaisesRegex(ValueError, "unconfirmed"):
             dispatch.validate(self.run, self.plan, self.project, "impl")
 
     def test_dependencies_and_directory_overlap_block_dispatch(self):
@@ -201,6 +205,7 @@ class OrchestrationTests(unittest.TestCase):
     def test_four_worker_reservations_block_fifth_task(self):
         for index in range(4):
             self.plan['tasks'].append({'id': 'active' + str(index), 'state': 'dispatching', 'writes': []})
+        self.critique(self.tasks[0])
         with self.assertRaisesRegex(ValueError, 'Four workers'):
             dispatch.validate(self.run, self.plan, self.project, 'impl')
 

@@ -12,6 +12,7 @@ history.jsonl
 **/dashboard.url
 **/.notified.json
 __pycache__/
+desktop/dist/
 *.pyc
 .DS_Store
 

@@ -144,11 +144,34 @@ class AppDelegate: NSObject, NSApplicationDelegate, WKScriptMessageHandler, WKNa
     var skillPath: String = ""
     var dashboard: URL? { guard let text=state["dashboard"] as? String else {return nil}; return URL(string:text) }
 
+    func application(_ sender: NSApplication, openFiles filenames: [String]) {
+        do {
+            guard filenames.count == 1 else {throw NSError(domain:"FieldTeam",code:1,userInfo:[NSLocalizedDescriptionKey:"Select one run target"])}
+            let data=try Data(contentsOf:URL(fileURLWithPath:filenames[0]))
+            guard let target=try JSONSerialization.jsonObject(with:data) as? [String:Any],
+                  target["field_team_target"] as? Int == 1,
+                  let run=target["run"] as? String,run.hasPrefix("/"),
+                  let skill=target["skill"] as? String,skill.hasPrefix("/"),
+                  FileManager.default.fileExists(atPath:run+"/plan.json"),
+                  FileManager.default.fileExists(atPath:skill+"/scripts/field_team.py") else {
+                throw NSError(domain:"FieldTeam",code:2,userInfo:[NSLocalizedDescriptionKey:"Invalid Field Team run target"])
+            }
+            generation+=1;runPath=run;skillPath=skill;state=[:];loadedURL=nil
+            UserDefaults.standard.set(run,forKey:"runPath")
+            UserDefaults.standard.set(skill,forKey:"skillPath")
+            if companionWindow != nil {companionWindow.orderFrontRegardless();showMessage("Connecting to selected run…");refresh()}
+            sender.reply(toOpenOrPrint:.success)
+        } catch {
+            if web != nil {showMessage(error.localizedDescription)}
+            sender.reply(toOpenOrPrint:.failure)
+        }
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         let source = (try? String(contentsOf:resources.appendingPathComponent("skill-path.txt"),encoding:.utf8))?.trimmingCharacters(in:.whitespacesAndNewlines)
         let bundled=resources.appendingPathComponent("runtime").path
-        let candidate=UserDefaults.standard.string(forKey:"skillPath") ?? source ?? bundled
+        let candidate=skillPath.isEmpty ? (UserDefaults.standard.string(forKey:"skillPath") ?? source ?? bundled) : skillPath
         skillPath=FileManager.default.fileExists(atPath:candidate+"/scripts/field_team.py") ? candidate : bundled
         companionWindow=panel(NSSize(width:220,height:174),transparent:true)
         companion=CompanionView(frame:NSRect(x:0,y:0,width:220,height:174))

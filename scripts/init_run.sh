@@ -63,7 +63,9 @@ plan = {
     "definition_of_done": [], "verification_plan": "",
     "run_budget_usd": float(budget) if budget else None,
     "git_dirty_at_start": dirty, "dashboard_url": None,
-    "dashboard_theme": "xsolla", "dashboard": "off", "version": 1,
+    "dashboard_theme": "xsolla", "dashboard": "local", "version": 1,
+    "dispatch_confirmation": None,
+    "orchestrator": {"status": "clarifying", "summary": "Preparing the goal; no agents authorized yet"},
     "tasks": [], "approvals": [], "log": [],
 }
 unfilled = set()

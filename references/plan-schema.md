@@ -14,7 +14,8 @@
   ],
   "verification_plan": "npm test && npm run typecheck",
   "run_budget_usd": 20,
-  "dashboard": "off",
+  "dashboard": "local",
+  "dispatch_confirmation": null,
   "dashboard_theme": "xsolla",
   "git_dirty_at_start": [],
   "tasks": [
@@ -52,6 +53,7 @@
 |---|---|
 | `shape` | The routing row key (`lookup`, `mechanical`, `spec`, `tricky`, `ambiguous`, `review`). Feeds the routing history. |
 | `writes` | Paths relative to `project_dir`, or absolute. A trailing `/` means a whole folder. **Enforced** by the write-guard hook, and snapshotted before each attempt. |
+| `depends_on` | IDs of tasks whose verified output this task needs. Independent tasks use `[]` and launch together via `dispatch_wave.py`; task order and per-worker review do not create dependencies. |
 | `accept` | Boss-only acceptance command, run from `project_dir`. Exit 0 means pass. Must test every done-criterion. |
 | `skills` | `true` only if the worker must run one of the user's skills. That loads user settings and costs more at startup. |
 | `add_dirs` | Extra folders the worker may access (for example a second repo). |
@@ -61,7 +63,8 @@
 | `routing_history` | *script* (`escalate.py`). One entry per retry: cause, from/to tier, resumed, rolled back, gap. |
 | `accept_results` | *script* (`accept.py`). One entry per acceptance run. |
 | `approvals[].status` | `pending`, `executed`, `rejected`. Review and execute decisions through the supervising Claude conversation. |
-| `dashboard` | `"off"` by default; optional local view only. No hosted artifact copy. |
+| `dashboard` | `"local"` by default; widget and dashboard open before clarification. No hosted artifact copy. |
+| `dispatch_confirmation` | Written by `dispatch_approval.py approve` only after explicit chat confirmation of the displayed goal and dispatch table. Fingerprinted to the run, project, scope, routing, spending, access, and acceptance checks. Missing/stale confirmation blocks critics and workers. Execution state and display changes do not invalidate it. |
 | `specialist` | Optional `implementation` or `review`, independent of the model route. |
 | `routing_reason` | Required explanation of the selected model and effort. |
 | `risk` | `normal` or `high`; high-risk routine tasks receive a stronger baseline route. |

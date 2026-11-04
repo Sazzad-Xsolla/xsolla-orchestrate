@@ -18,6 +18,7 @@ TASK="${2:?task_id}"
 SKILL="$(cd "$(dirname "$0")/.." && pwd)"
 source "$SKILL/scripts/lib.sh"
 [ "${XSOLLA_DISPATCH_TASK:-}" = "$TASK" ] || { echo "Use scripts/dispatch.py to validate and reserve workers" >&2; exit 2; }
+python3 "$SKILL/scripts/dispatch_approval.py" "$RUN" check >/dev/null
 PLAN="$RUN/plan.json"
 W="$RUN/workers/$TASK"
 BRIEF="$W/brief.md"
