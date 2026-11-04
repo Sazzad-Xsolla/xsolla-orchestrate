@@ -1,113 +1,174 @@
-# Xsolla orchestrate
+# Xsolla Orchestrate
 
-Source repository: [Sazzad-Xsolla/xsolla-orchestrate](https://github.com/Sazzad-Xsolla/xsolla-orchestrate).
+**Plan, run, and verify parallel Claude Code workers from one conversation.**
 
-A Claude Code orchestration skill with an optional Field Team interface. It plans and routes tasks, critiques briefs, monitors worker logs, brokers agent handoffs, and verifies results. Use the skill directly in Claude Code; Field Team provides an optional view of runs through a native pane, web dashboard, or macOS companion.
+Xsolla Orchestrate turns a scoped task into an execution plan, assigns models and effort, reviews worker briefs, and launches independent workers in parallel. The supervising Claude conversation coordinates the work and verifies each result. Field Team provides a native Claude pane, a local dashboard, and a macOS desktop companion for following progress.
 
-## Install the skill
+[Quick start](#quick-start) · [How it works](#how-it-works) · [Field Team](#field-team) · [Development](#development) · [Limitations](#limitations)
 
-Python 3.9+, Bash, Git, curl, and Claude Code are required for live execution. Model access and authentication use the existing Claude installation. Headroom is optional. No Python packages or frontend build step are required for the skill.
+## Capabilities
 
-From this repository:
+| Capability | Behavior |
+| --- | --- |
+| Parallel execution | Launch up to four independent workers together; dependent tasks wait for verified output. |
+| Model routing | Choose a configured model and effort for each task, with recorded routing and recovery decisions. |
+| Brief review | Review instructions before launch and invalidate the review when relevant inputs change. |
+| Monitoring | Collect worker logs, reports, recorded spend, and watchdog signals. |
+| Verification | Run acceptance checks and inspect evidence before marking a task verified. |
+| Continuity | Retain run records, reviewed specialist memory, and handoff messages for later dispatch or resume. |
+| Field Team | Follow goals, assignments, progress, and pending decisions from the same run records. |
+
+## Requirements
+
+- Claude Code with an authenticated account and access to the configured worker models.
+- Python 3.9+, Bash, Git, and curl.
+- macOS 12+ and Xcode Command Line Tools for building the desktop companion used by the default startup workflow.
+- Optional: a running Headroom proxy for token compression.
+
+The core Python runtime requires no third-party Python packages or frontend build step. Live workers use your Claude account and incur model usage charges. The local doctor checks CLI capabilities; it cannot verify authentication or model access.
+
+## Quick start
+
+### 1. Clone and install
 
 ```bash
+git clone https://github.com/Sazzad-Xsolla/xsolla-orchestrate.git
+cd xsolla-orchestrate
 python3 scripts/doctor.py
 python3 scripts/install.py --destination ~/.claude/skills/xsolla-orchestrate
 ```
 
-The installer links this checkout under its own skill name and refuses to overwrite anything. Keep the checkout at its installed path. Invoke `/xsolla-orchestrate` in Claude Code and give it a scoped task. Existing skills and user configuration are unchanged. Use an explicit destination for another supported skills directory.
+The installer links this checkout into your skills directory and refuses to overwrite an existing installation. Keep the checkout at this location after installation.
 
-For live workers without the optional proxy, set `ORCH_ALLOW_UNWRAPPED=1` in the environment launching the orchestrator. The skill honors existing authorization but does not grant workers permission to publish, deploy, or message people.
+### 2. Open your project in Claude Code
 
-## Everyday use in Claude Code
+```bash
+cd /absolute/path/to/your-project
+ORCH_ALLOW_UNWRAPPED=1 claude
+```
 
-From the project you want to work on, launch `ORCH_ALLOW_UNWRAPPED=1 claude` if you are not using the optional Headroom proxy. The flag permits the skill to use Claude directly; it does not install or launch a proxy. Then invoke the skill with natural-language instructions:
+`ORCH_ALLOW_UNWRAPPED=1` permits workers to run directly when Headroom is unavailable. If you use Headroom, start its proxy through your usual setup before launching the run. The skill does not start or configure the proxy.
+
+### 3. Describe the work
 
 ```text
 /xsolla-orchestrate Build the checkout flow. Keep changes local and verify them with tests.
-/xsolla-orchestrate Show the current goal, party, progress, and anything that needs me.
+```
+
+Start from the actual project directory. If you launch from a parent directory containing several projects, Claude needs to identify the intended project first.
+
+The skill creates a run, opens the dashboard and desktop widget, and prepares a dispatch plan. Review the goal, acceptance criteria, assignments, model routes, and spending checkpoints. Critics and workers launch after you confirm that concrete plan.
+
+Other example requests:
+
+```text
+/xsolla-orchestrate Show the current goal, worker progress, and anything that needs me.
 /xsolla-orchestrate Resume the latest run in this project.
 /xsolla-orchestrate Review the pending requests and explain the exact actions.
 ```
 
-These are prompts for the skill, not separate fixed subcommands. The supervising Claude conversation plans, routes, critiques, dispatches, and verifies the work. The desktop app only observes runs and records permission decisions.
+These are natural-language requests, not fixed CLI subcommands.
 
-Independent workers launch together (up to four) through `python3 scripts/dispatch_wave.py RUN TASK_A TASK_B`, after plan confirmation and brief critiques. The helper starts every listed dispatcher before waiting. Workers use separate `claude -p` processes through Bash, including when the supervisor is in automode; native Agent/Task tools are not required. The supervisor's permissions still need to allow the launcher command. Real dependencies wait for verified output; independent workers do not wait for each other's review.
+## How it works
 
-Useful terminal commands (replace `PROJECT` and `RUN` with actual paths):
+1. **Prepare.** Select the project, create or resume an isolated run, and open its Field Team views.
+2. **Plan.** Define task ownership, dependencies, acceptance checks, model routes, and worker briefs.
+3. **Confirm and critique.** Obtain confirmation of the dispatch plan, then review each brief.
+4. **Dispatch in parallel.** Start the ready group of independent workers before waiting for any worker's result.
+5. **Monitor and coordinate.** Review logs, watchdog signals, reports, and proposed handoffs.
+6. **Verify.** Run acceptance checks, inspect the changes, and record verified outcomes before unlocking dependent tasks.
+
+Workers run as separate `claude -p` processes through the bundled Bash/Python launchers. This workflow uses CLI workers in automode and does not require native Agent/Task subagent tools. The supervising session must still permit the launcher commands; a permission denial stops dispatch.
+
+The group launcher checks approval, brief reviews, capacity, dependencies, and file ownership before starting dispatchers. Run from the checkout with actual run paths and task IDs:
 
 ```bash
-python3 ~/.claude/skills/xsolla-orchestrate/scripts/doctor.py
-bash ~/.claude/skills/xsolla-orchestrate/scripts/list_runs.sh PROJECT
-python3 ~/.claude/skills/xsolla-orchestrate/scripts/status.py RUN
-python3 ~/.claude/skills/xsolla-orchestrate/scripts/serve_dashboard.py RUN
+python3 scripts/dispatch_wave.py /absolute/path/to/run task-a task-b --check
+python3 scripts/dispatch_wave.py /absolute/path/to/run task-a task-b
 ```
 
-In Field Team's menu choose **Choose run or project…**, then select the same project or a run under `.xsolla-orchestrator/`. Click the trainer for Party, Needs you, and Log. Approve/Deny records the decision; it never executes the requested action.
+Independent tasks use disjoint write lists. Tasks requiring another task's output wait until that dependency is verified. Each dispatcher rechecks the constraints and reserves its slot under a lock.
 
-## Free demonstration
+Run records live in the target project's `.xsolla-orchestrator/` directory. To inspect existing runs:
+
+```bash
+bash ~/.claude/skills/xsolla-orchestrate/scripts/list_runs.sh /absolute/path/to/project
+python3 ~/.claude/skills/xsolla-orchestrate/scripts/status.py /absolute/path/to/run
+```
+
+## Field Team
+
+Field Team displays the goal, worker assignments, models and effort, recorded spend, recent activity, and pending decisions. Approve/Deny controls record decisions; the supervising conversation reviews and executes authorized actions separately.
+
+### Dashboard and macOS companion
+
+The default skill workflow opens both views and pins them to the selected run. In the desktop companion, use **Choose run or project…** to inspect another run. Click the trainer to open the party, pending requests, and activity log; drag it to reposition the widget.
+
+For manual dashboard startup or a desktop build, run from the checkout:
+
+```bash
+python3 scripts/serve_dashboard.py /absolute/path/to/run
+bash desktop/build.sh /absolute/path/to/output
+```
+
+The companion supports reduced motion. Local builds are ad-hoc signed and are not notarized. See [Field Team implementation notes](docs/FIELD-TEAM.md) for view behavior, decision handling, and platform details.
+
+### Native Claude Code pane
+
+To load the native pane and progress band, use the checkout as a Claude Code plugin. This integration requires Claude Code 2.1.287 or later.
+
+```bash
+cd /absolute/path/to/your-project
+ORCH_ALLOW_UNWRAPPED=1 claude --plugin-dir /absolute/path/to/xsolla-orchestrate
+```
+
+Invoke `/xsolla-orchestrate:xsolla-orchestrate` with your task. Use `/field-team` to follow the project's newest run, or `/field-team /absolute/path/to/run` to select a specific run. The pane has Party, Needs you, and Activity tabs. **Review in chat** prepares a draft for you to submit to the supervising conversation.
+
+Choose either the standalone skill installation or the plugin loading method to avoid duplicate skill listings. The native pane itself does not require the dashboard or macOS app; the skill's default workflow still opens both views. Loading the plugin alone does not start workers.
+
+## Try a demonstration
+
+From the checkout:
 
 ```bash
 python3 scripts/demo.py --output /tmp/xsolla-orchestrate-demo
 python3 scripts/serve_dashboard.py /tmp/xsolla-orchestrate-demo/.xsolla-orchestrator/demo --port 8792
 ```
 
-The demonstration uses synthetic worker logs and exercises routing, handoff messages, review, memory approval, and memory reuse. It makes no model calls and never launches workers. The generated view explicitly labels the data as a demonstration.
+The demonstration uses synthetic records to show routing, handoffs, review, and specialist memory. It makes no model calls, launches no workers, and labels its data as a demonstration.
 
-## Develop and verify
+## Development
+
+Run the Python test suite from the checkout:
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-`SKILL.md` is the Claude entrypoint. Runtime code is in `scripts/`, routing policy in `config/routing.json`, specialist definitions in `profiles/`, and the optional view in `prototypes/xsolla-run.html`. The original runtime baseline and revision are recorded in `UPSTREAM.json`. Project records are isolated under `.xsolla-orchestrator/`.
-
-## Working boundaries
-
-Model routing chooses from the configured runtime aliases; the local doctor checks flags but cannot prove model access. Communication is delivered on dispatch or resume, not while an agent is already running. Memory is project-scoped and explicitly reviewed. Guard hooks and command restrictions are not a security sandbox: use an isolated environment for untrusted projects. Pause/recovery controls require the supervising Claude session.
-
-The UI includes Xsolla design tokens and official brand artwork from the supplied design system. Fonts load from the Xsolla CDN with system fallbacks, so viewing the page may make font requests. No logs or project records are sent to that CDN. Brand review is still required before company rollout.
-
-## Optional native Field Team interface
-
-To use the skill with a native Field Team pane and a progress band above the prompt, load this checkout as a plugin. This optional installation path requires Claude Code 2.1.287 or later. From the project you want to work on:
-
-```bash
-ORCH_ALLOW_UNWRAPPED=1 claude --plugin-dir /absolute/path/to/xsolla-orchestrate
-```
-
-Use `/xsolla-orchestrate:xsolla-orchestrate` with your task to invoke the bundled skill. Use `/field-team` to open the native pane, or `/field-team /absolute/path/to/run` to select a run. With no argument it follows the newest run in the current project. The pane has Party, Needs you, and Activity tabs. It reads the same runtime state as the web dashboard, including verified progress, recorded spend, worker model/effort, and request fingerprints. Synthetic runs are labeled as demonstrations.
-
-Interactive sessions refresh every five seconds and after a supervising turn. Refresh errors label the last snapshot as stale. Review in chat fills a draft for the user to submit; it neither approves nor executes a request. Run dispatch and acceptance continue through the bundled skill. The native interface does not need the separate web server or macOS app. Loading the plugin does not start workers or make model calls. Choose either this plugin installation or the standalone skill installation above to avoid duplicate skill listings.
-
-Validate and test the optional plugin from this checkout:
+For the native plugin, also run:
 
 ```bash
 claude plugin validate .
 claude plugin test .
-python3 -m unittest discover -s tests -v
 ```
 
-Validated and tested with Claude Code 2.1.316. Native hook tests exercise terminal and desktop element trees; visual layout in an interactive Claude session still needs a pilot. The plugin has not been published to a marketplace. Directory submission checks report missing license, author, and icon metadata; choose these before publishing.
+| Location | Purpose |
+| --- | --- |
+| [SKILL.md](SKILL.md) | Supervising workflow and execution rules |
+| [scripts/](scripts/) | Dispatch, monitoring, acceptance, and run management |
+| [config/routing.json](config/routing.json) | Model routing policy |
+| [profiles/](profiles/) | Specialist definitions |
+| [skills/xsolla-orchestrate/](skills/xsolla-orchestrate/) | Claude Code plugin skill entrypoint |
+| [desktop/](desktop/) | macOS companion source and build tooling |
+| [tests/](tests/) | Runtime and integration tests |
 
-## Optional Field Team dashboard and desktop companion
+See [the implementation checklist](docs/IMPLEMENTATION.md) for validation coverage and remaining work, and [UPSTREAM.json](UPSTREAM.json) for the original runtime baseline.
 
-The local run view now implements the approved Field Team layout: a goal and orchestrator summary, a creature party with Claude model/effort/goal/status, recent activity, agent details, and Approve/Deny controls. A browser and desktop widget watching the same run share decisions. Approvals record permission only; supervising Claude executes authorized actions separately.
+## Limitations
 
-```bash
-python3 scripts/field_demo.py /tmp/field-team-demo
-python3 scripts/serve_dashboard.py /tmp/field-team-demo/.xsolla-orchestrator/field-team-demo
-bash desktop/build.sh /absolute/path/to/output
-```
-
-Open `Xsolla Field Team.app`, then use **Choose run or project…** in its menu. The app prefers this checkout and bundles a runtime fallback. First launch uses an explicitly synthetic demo. Selecting a project follows its newest `.xsolla-orchestrator` run. Drag the trainer to move it; click it to open Party, Needs you, and Log. Use **Choose xsolla-orchestrate folder…** to connect an updated checkout. Requires macOS 12+, Python 3 at `/usr/bin/python3`, and Xcode Command Line Tools for building. The local build is ad-hoc signed, not notarized.
-
-See [Field Team implementation notes](docs/FIELD-TEAM.md) for metadata, decision semantics, validation, and limits. Legacy Run-Dex remains separate. Global skill installation is still explicit and uses the installer above.
-
-Field Team 0.2 uses the approved cream-and-teal RPG style, pixel party portraits, and animated trainer/Pip poses. Idle blinks, working gestures, new-request alerts, completion celebrations, and log cues follow run events. Repeated polling does not replay notifications. The widget and dashboard offer Reduce motion, and macOS reduced motion is respected.
-
-Field Team 0.3 refines this into the warm Xsolla field-journal design: parchment and sage surfaces, blue navigation, restrained cyan actions, unbranded character art, a dedicated Atlas portrait, and eight-frame companion gestures with longer quiet pauses. The other theme work is preserved separately under `theme-lab/`; a theme picker will be integrated later.
-
-The November 2 motion revision replaces generated pose cycling with one stable drawing and subtle, continuous breathing anchored at the feet. Requests and completions use the existing envelope and notices; reduced motion keeps the drawing still. Earlier pose-animation descriptions above are historical.
-
-Live model execution and account-specific compatibility require a pilot. See `docs/IMPLEMENTATION.md` for the delivery checklist and remaining work.
+- **Live compatibility needs a pilot.** Account-specific model access and live automode execution require validation in your Claude environment. Parallel dispatch has automated coverage using fixture workers.
+- **Worker restrictions are not an OS sandbox.** Tool restrictions, command shims, write hooks, snapshots, and watchdogs provide operational controls. Use an isolated environment for untrusted projects. See [guardrails](references/guardrails.md).
+- **Handoffs arrive at checkpoints.** Messages are delivered on dispatch or resume; they are not injected into an active worker. Specialist memory is scoped to the project and explicitly reviewed.
+- **External actions remain supervised.** Workers propose consequential actions in reports. Publishing, deploying, messaging, and other actions requiring authorization are handled by the supervising conversation after approval.
+- **Distribution is local.** The plugin has not been published to a marketplace. License, author, and icon metadata still need review before directory submission.
+- **Brand review is pending.** The interface uses Xsolla design resources and CDN-hosted fonts with system fallbacks. Font loading may make CDN requests; project records and logs are not sent to that CDN. Company rollout requires brand review.
